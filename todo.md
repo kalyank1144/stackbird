@@ -96,3 +96,13 @@
 - [x] Add template selection to project creation UI
 - [x] Implement template initialization logic
 - [x] Test all templates
+
+## Phase 13: GitHub Integration
+- [x] Set up GitHub OAuth authentication
+- [x] Store GitHub access tokens securely
+- [x] Create API endpoint to check GitHub connection status
+- [x] Create API endpoint to create GitHub repository
+- [x] Create API endpoint to push code to GitHub
+- [x] Add "Push to GitHub" button in Project page
+- [x] Add GitHub connection status indicator
+- [x] Test GitHub integration end-to-end

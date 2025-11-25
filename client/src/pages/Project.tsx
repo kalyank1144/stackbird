@@ -6,7 +6,7 @@ import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/componen
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { trpc } from "@/lib/trpc";
 import Editor from "@monaco-editor/react";
-import { ArrowLeft, Send, Loader2, MessageSquare, Code2, FileText } from "lucide-react";
+import { ArrowLeft, Send, Loader2, MessageSquare, Code2, FileText, Github, Play } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useSocket } from "@/hooks/useSocket";
 import { Link, useParams } from "wouter";
@@ -14,6 +14,10 @@ import { toast } from "sonner";
 import { APP_TITLE, getLoginUrl } from "@/const";
 import FileBrowser from "@/components/FileBrowser";
 import Terminal from "@/components/Terminal";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
 
 // Helper to get Monaco language from file path
 function getLanguageFromPath(path: string): string {
@@ -47,11 +51,28 @@ export default function Project() {
   const [editorContent, setEditorContent] = useState("");
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [isExecuting, setIsExecuting] = useState(false);
+  const [githubDialogOpen, setGithubDialogOpen] = useState(false);
+  const [repoName, setRepoName] = useState("");
+  const [repoDescription, setRepoDescription] = useState("");
+  const [isPrivate, setIsPrivate] = useState(false);
 
   const { data: project, isLoading: projectLoading } = trpc.projects.get.useQuery(
     { projectId },
     { enabled: !!projectId }
   );
+
+  const { data: githubStatus } = trpc.github.status.useQuery();
+  const { data: repoStatus } = trpc.github.checkRepo.useQuery({ projectId });
+  const pushToGitHub = trpc.github.createAndPush.useMutation({
+    onSuccess: (data) => {
+      toast.success("Successfully pushed to GitHub!");
+      setGithubDialogOpen(false);
+      window.open(data.htmlUrl, "_blank");
+    },
+    onError: (error) => {
+      toast.error(error.message);
+    },
+  });
 
   const { data: conversations } = trpc.chat.conversations.useQuery(
     { projectId },
@@ -220,7 +241,7 @@ export default function Project() {
           {/* Code Editor Panel */}
           <ResizablePanel defaultSize={60} minSize={40}>
             <div className="h-full flex flex-col">
-              <div className="border-b px-4 py-2 flex items-center justify-between">
+              <div className="border-b px-4 py-2 flex items-center justify-between gap-2">
                 <div className="flex items-center gap-2">
                   <Code2 className="h-4 w-4 text-primary" />
                   <span className="text-sm font-medium">
@@ -230,29 +251,67 @@ export default function Project() {
                     <span className="text-xs text-orange-500">● Unsaved</span>
                   )}
                 </div>
-                {selectedFile && (
+                <div className="flex items-center gap-2">
+                  {selectedFile && (
+                    <>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          updateFile.mutate({
+                            projectId,
+                            filePath: selectedFile.path,
+                            content: editorContent,
+                          });
+                        }}
+                        disabled={!hasUnsavedChanges || updateFile.isPending}
+                      >
+                        {updateFile.isPending ? (
+                          <>
+                            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                            Saving...
+                          </>
+                        ) : (
+                          "Save (Ctrl+S)"
+                        )}
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          if (selectedFile) {
+                            executeCode.mutate({
+                              projectId,
+                              filePath: selectedFile.path,
+                            });
+                          }
+                        }}
+                        disabled={isExecuting}
+                      >
+                        {isExecuting ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                          <Play className="h-4 w-4" />
+                        )}
+                      </Button>
+                    </>
+                  )}
                   <Button
                     variant="outline"
                     size="sm"
                     onClick={() => {
-                      updateFile.mutate({
-                        projectId,
-                        filePath: selectedFile.path,
-                        content: editorContent,
-                      });
+                      if (!githubStatus?.isAuthenticated) {
+                        toast.error("GitHub not connected. Please connect your GitHub account.");
+                        return;
+                      }
+                      setRepoName(project?.name.toLowerCase().replace(/\s+/g, "-") || "");
+                      setRepoDescription(project?.description || "");
+                      setGithubDialogOpen(true);
                     }}
-                    disabled={!hasUnsavedChanges || updateFile.isPending}
                   >
-                    {updateFile.isPending ? (
-                      <>
-                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                        Saving...
-                      </>
-                    ) : (
-                      "Save (Ctrl+S)"
-                    )}
+                    <Github className="h-4 w-4" />
                   </Button>
-                )}
+                </div>
               </div>
               <Editor
                 height="100%"
@@ -400,6 +459,85 @@ export default function Project() {
           </ResizablePanel>
         </ResizablePanelGroup>
       </div>
+
+      {/* GitHub Push Dialog */}
+      <Dialog open={githubDialogOpen} onOpenChange={setGithubDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Push to GitHub</DialogTitle>
+            <DialogDescription>
+              Create a new repository and push your code to GitHub
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="repo-name">Repository Name</Label>
+              <Input
+                id="repo-name"
+                value={repoName}
+                onChange={(e) => setRepoName(e.target.value)}
+                placeholder="my-awesome-project"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="repo-description">Description (Optional)</Label>
+              <Textarea
+                id="repo-description"
+                value={repoDescription}
+                onChange={(e) => setRepoDescription(e.target.value)}
+                placeholder="A brief description of your project"
+              />
+            </div>
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="private"
+                checked={isPrivate}
+                onCheckedChange={(checked) => setIsPrivate(checked as boolean)}
+              />
+              <Label htmlFor="private" className="text-sm font-normal cursor-pointer">
+                Make repository private
+              </Label>
+            </div>
+            {repoStatus?.hasRepo && (
+              <div className="text-sm text-amber-600 bg-amber-50 p-3 rounded-md">
+                ⚠️ This project already has a Git repository. Pushing will overwrite the remote.
+              </div>
+            )}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setGithubDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button
+              onClick={() => {
+                if (!repoName.trim()) {
+                  toast.error("Repository name is required");
+                  return;
+                }
+                pushToGitHub.mutate({
+                  projectId,
+                  repoName: repoName.trim(),
+                  description: repoDescription.trim() || undefined,
+                  isPrivate,
+                });
+              }}
+              disabled={pushToGitHub.isPending}
+            >
+              {pushToGitHub.isPending ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Pushing...
+                </>
+              ) : (
+                <>
+                  <Github className="h-4 w-4 mr-2" />
+                  Push to GitHub
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

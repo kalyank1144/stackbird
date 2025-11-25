@@ -8,6 +8,7 @@ import { ENV } from "./_core/env";
 import { getTemplateById, getAllTemplates } from "./templates";
 import { emitToUser } from "./_core/socket";
 import { executeCode } from "./executor";
+import { GitHubIntegration } from "./github";
 
 export const projectRouter = router({
   templates: publicProcedure.query(() => {
@@ -221,6 +222,73 @@ export const chatRouter = router({
       }
       
       return await db.getProjectConversations(input.projectId);
+    }),
+});
+
+export const githubRouter = router({
+  status: protectedProcedure.query(async () => {
+    const isAuth = await GitHubIntegration.isAuthenticated();
+    const username = isAuth ? await GitHubIntegration.getUsername() : null;
+    return { isAuthenticated: isAuth, username };
+  }),
+
+  createAndPush: protectedProcedure
+    .input(z.object({
+      projectId: z.number(),
+      repoName: z.string().min(1).max(100),
+      description: z.string().optional(),
+      isPrivate: z.boolean().default(false),
+      commitMessage: z.string().default("Initial commit from Stackbird"),
+    }))
+    .mutation(async ({ ctx, input }) => {
+      // Verify project ownership
+      const project = await db.getProjectById(input.projectId);
+      if (!project) {
+        throw new TRPCError({ code: "NOT_FOUND", message: "Project not found" });
+      }
+      if (project.userId !== ctx.user.id) {
+        throw new TRPCError({ code: "FORBIDDEN", message: "Access denied" });
+      }
+
+      // Create GitHub repository
+      const repo = await GitHubIntegration.createRepository(
+        input.repoName,
+        input.description || project.description || "",
+        input.isPrivate
+      );
+
+      // Push code to GitHub (using user's email from context)
+      const repoUrl = await GitHubIntegration.pushToGitHub(
+        input.projectId,
+        input.repoName,
+        input.commitMessage,
+        ctx.user.email || "kalyankumarchindam@gmail.com",
+        ctx.user.name || "Stackbird User"
+      );
+
+      return {
+        success: true,
+        repoUrl,
+        htmlUrl: repo.htmlUrl,
+      };
+    }),
+
+  checkRepo: protectedProcedure
+    .input(z.object({ projectId: z.number() }))
+    .query(async ({ ctx, input }) => {
+      // Verify project ownership
+      const project = await db.getProjectById(input.projectId);
+      if (!project) {
+        throw new TRPCError({ code: "NOT_FOUND", message: "Project not found" });
+      }
+      if (project.userId !== ctx.user.id) {
+        throw new TRPCError({ code: "FORBIDDEN", message: "Access denied" });
+      }
+
+      const hasRepo = await GitHubIntegration.hasGitRepo(input.projectId);
+      const remoteUrl = hasRepo ? await GitHubIntegration.getRemoteUrl(input.projectId) : null;
+
+      return { hasRepo, remoteUrl };
     }),
 });
 
