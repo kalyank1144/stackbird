@@ -63,7 +63,16 @@ export class AiderSession extends EventEmitter {
 
       this.process.stderr?.on("data", (data: Buffer) => {
         const text = data.toString();
-        this.emit("error", text);
+        // Filter out common Aider progress/warning messages that aren't real errors
+        const isProgressOrWarning = 
+          text.includes("Scanning repo") ||
+          text.includes("%|") ||
+          text.includes("Warning: Input is not a terminal") ||
+          text.includes("fd=");
+        
+        if (!isProgressOrWarning) {
+          this.emit("error", text);
+        }
       });
 
       this.process.on("error", (error) => {
