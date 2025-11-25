@@ -277,6 +277,30 @@ export const fileRouter = router({
       }
     }),
 
+  update: protectedProcedure
+    .input(z.object({ 
+      projectId: z.number(), 
+      filePath: z.string(),
+      content: z.string()
+    }))
+    .mutation(async ({ ctx, input }) => {
+      // Verify project ownership
+      const project = await db.getProjectById(input.projectId);
+      if (!project || project.userId !== ctx.user.id) {
+        throw new TRPCError({ code: "FORBIDDEN", message: "Access denied" });
+      }
+
+      try {
+        await WorkspaceManager.writeFile(input.projectId, input.filePath, input.content);
+        return { success: true, filePath: input.filePath };
+      } catch (error) {
+        throw new TRPCError({ 
+          code: "INTERNAL_SERVER_ERROR", 
+          message: "Failed to save file" 
+        });
+      }
+    }),
+
   listFromDatabase: protectedProcedure
     .input(z.object({ projectId: z.number() }))
     .query(async ({ ctx, input }) => {

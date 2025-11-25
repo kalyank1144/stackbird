@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -7,6 +7,7 @@ import { toast } from "sonner";
 
 interface FileBrowserProps {
   projectId: number;
+  onFileSelect?: (filePath: string, content: string) => void;
 }
 
 interface FileNode {
@@ -101,7 +102,7 @@ function FileTreeNode({
   );
 }
 
-export default function FileBrowser({ projectId }: FileBrowserProps) {
+export default function FileBrowser({ projectId, onFileSelect }: FileBrowserProps) {
   const [selectedFile, setSelectedFile] = useState<string | null>(null);
   
   const { data: files, isLoading, refetch } = trpc.files.list.useQuery({ projectId });
@@ -109,6 +110,13 @@ export default function FileBrowser({ projectId }: FileBrowserProps) {
     { projectId, filePath: selectedFile! },
     { enabled: !!selectedFile }
   );
+  
+  // Call onFileSelect when file content loads
+  useEffect(() => {
+    if (fileContent && selectedFile && onFileSelect) {
+      onFileSelect(selectedFile, fileContent.content);
+    }
+  }, [fileContent, selectedFile, onFileSelect]);
   
   const fileTree = files ? buildFileTree(files) : [];
   

@@ -14,6 +14,27 @@ import { toast } from "sonner";
 import { APP_TITLE, getLoginUrl } from "@/const";
 import FileBrowser from "@/components/FileBrowser";
 
+// Helper to get Monaco language from file path
+function getLanguageFromPath(path: string): string {
+  const ext = path.split(".").pop()?.toLowerCase();
+  const languageMap: Record<string, string> = {
+    js: "javascript",
+    jsx: "javascript",
+    ts: "typescript",
+    tsx: "typescript",
+    py: "python",
+    json: "json",
+    html: "html",
+    css: "css",
+    md: "markdown",
+    sql: "sql",
+    sh: "shell",
+    yaml: "yaml",
+    yml: "yaml",
+  };
+  return languageMap[ext || ""] || "plaintext";
+}
+
 export default function Project() {
   const { id } = useParams();
   const projectId = parseInt(id || "0");
@@ -21,6 +42,9 @@ export default function Project() {
   const [message, setMessage] = useState("");
   const [currentConversationId, setCurrentConversationId] = useState<number | undefined>();
   const { isConnected, streamingData, clearStreamingData } = useSocket();
+  const [selectedFile, setSelectedFile] = useState<{ path: string; content: string } | null>(null);
+  const [editorContent, setEditorContent] = useState("");
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 
   const { data: project, isLoading: projectLoading } = trpc.projects.get.useQuery(
     { projectId },
@@ -36,6 +60,16 @@ export default function Project() {
     { conversationId: currentConversationId! },
     { enabled: !!currentConversationId }
   );
+
+  const updateFile = trpc.files.update.useMutation({
+    onSuccess: () => {
+      toast.success("File saved!");
+      setHasUnsavedChanges(false);
+    },
+    onError: (error) => {
+      toast.error(`Failed to save: ${error.message}`);
+    },
+  });
 
   const sendMessage = trpc.chat.send.useMutation({
     onSuccess: (data) => {
@@ -126,7 +160,14 @@ export default function Project() {
                 <span className="text-sm font-medium">Files</span>
               </div>
               <div className="flex-1 overflow-hidden">
-                <FileBrowser projectId={projectId} />
+                <FileBrowser 
+                  projectId={projectId}
+                  onFileSelect={(path, content) => {
+                    setSelectedFile({ path, content });
+                    setEditorContent(content);
+                    setHasUnsavedChanges(false);
+                  }}
+                />
               </div>
             </div>
           </ResizablePanel>
@@ -134,28 +175,60 @@ export default function Project() {
           <ResizableHandle withHandle />
 
           {/* Code Editor Panel */}
-          <ResizablePanel defaultSize={45} minSize={30}>
+          <ResizablePanel defaultSize={60} minSize={40}>
             <div className="h-full flex flex-col">
-              <div className="border-b px-4 py-2 flex items-center gap-2">
-                <Code2 className="h-4 w-4 text-primary" />
-                <span className="text-sm font-medium">Code Editor</span>
+              <div className="border-b px-4 py-2 flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Code2 className="h-4 w-4 text-primary" />
+                  <span className="text-sm font-medium">
+                    {selectedFile ? selectedFile.path : "Code Editor"}
+                  </span>
+                  {hasUnsavedChanges && (
+                    <span className="text-xs text-orange-500">● Unsaved</span>
+                  )}
+                </div>
+                {selectedFile && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      updateFile.mutate({
+                        projectId,
+                        filePath: selectedFile.path,
+                        content: editorContent,
+                      });
+                    }}
+                    disabled={!hasUnsavedChanges || updateFile.isPending}
+                  >
+                    {updateFile.isPending ? (
+                      <>
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        Saving...
+                      </>
+                    ) : (
+                      "Save (Ctrl+S)"
+                    )}
+                  </Button>
+                )}
               </div>
-              <div className="flex-1">
-                <Editor
-                  height="100%"
-                  defaultLanguage="typescript"
-                  defaultValue="// Welcome to Stackbird!\n// Start chatting with AI to generate code.\n\nfunction hello() {\n  console.log('Hello from Stackbird!');\n}\n"
-                  theme="vs-dark"
-                  options={{
-                    minimap: { enabled: false },
-                    fontSize: 14,
-                    lineNumbers: "on",
-                    roundedSelection: false,
-                    scrollBeyondLastLine: false,
-                    automaticLayout: true,
-                  }}
-                />
-              </div>
+              <Editor
+                height="100%"
+                language={selectedFile ? getLanguageFromPath(selectedFile.path) : "typescript"}
+                value={selectedFile ? editorContent : "// Select a file from the browser or start chatting with AI to generate code"}
+                onChange={(value) => {
+                  setEditorContent(value || "");
+                  setHasUnsavedChanges(true);
+                }}
+                theme="vs-dark"
+                options={{
+                  minimap: { enabled: false },
+                  fontSize: 14,
+                  lineNumbers: "on",
+                  roundedSelection: false,
+                  scrollBeyondLastLine: false,
+                  readOnly: !selectedFile,
+                }}
+              />
             </div>
           </ResizablePanel>
 

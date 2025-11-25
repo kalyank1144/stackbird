@@ -66,3 +66,13 @@
 - [x] Update frontend to connect to WebSocket
 - [x] Display streaming messages in real-time
 - [x] Test streaming functionality
+
+## Phase 10: File Browser & Editor Sync
+- [x] Add file selection state management
+- [x] Load file content when clicked in browser
+- [x] Display file content in Monaco Editor
+- [x] Add syntax highlighting based on file extension
+- [x] Implement file save functionality
+- [x] Add save button with keyboard shortcut (Ctrl+S)
+- [x] Show unsaved changes indicator
+- [x] Test file editing workflow
