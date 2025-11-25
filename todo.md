@@ -48,3 +48,12 @@
 - [x] Handle Aider errors gracefully
 - [x] Test end-to-end code generation
 - [x] Update tests for Aider integration
+
+## Phase 8: File Browser UI
+- [x] Create file listing API endpoint
+- [x] Create file read API endpoint
+- [x] Create file download endpoint
+- [x] Build file tree component
+- [x] Add file viewer with syntax highlighting
+- [x] Add download button for files
+- [x] Test file browser functionality

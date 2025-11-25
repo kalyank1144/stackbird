@@ -6,11 +6,12 @@ import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/componen
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { trpc } from "@/lib/trpc";
 import Editor from "@monaco-editor/react";
-import { ArrowLeft, Send, Loader2, MessageSquare, Code2 } from "lucide-react";
+import { ArrowLeft, Send, Loader2, MessageSquare, Code2, FileText } from "lucide-react";
 import { useState } from "react";
 import { Link, useParams } from "wouter";
 import { toast } from "sonner";
 import { APP_TITLE, getLoginUrl } from "@/const";
+import FileBrowser from "@/components/FileBrowser";
 
 export default function Project() {
   const { id } = useParams();
@@ -108,8 +109,23 @@ export default function Project() {
       {/* Main Workspace */}
       <div className="flex-1 overflow-hidden">
         <ResizablePanelGroup direction="horizontal">
+          {/* File Browser Panel */}
+          <ResizablePanel defaultSize={25} minSize={20}>
+            <div className="h-full flex flex-col border-r">
+              <div className="border-b px-4 py-2 flex items-center gap-2">
+                <FileText className="h-4 w-4 text-primary" />
+                <span className="text-sm font-medium">Files</span>
+              </div>
+              <div className="flex-1 overflow-hidden">
+                <FileBrowser projectId={projectId} />
+              </div>
+            </div>
+          </ResizablePanel>
+
+          <ResizableHandle withHandle />
+
           {/* Code Editor Panel */}
-          <ResizablePanel defaultSize={60} minSize={30}>
+          <ResizablePanel defaultSize={45} minSize={30}>
             <div className="h-full flex flex-col">
               <div className="border-b px-4 py-2 flex items-center gap-2">
                 <Code2 className="h-4 w-4 text-primary" />

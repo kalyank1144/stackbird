@@ -193,6 +193,79 @@ export const fileRouter = router({
       if (!project || project.userId !== ctx.user.id) {
         throw new TRPCError({ code: "FORBIDDEN", message: "Access denied" });
       }
+
+      // Check if workspace exists
+      const workspaceExists = await WorkspaceManager.workspaceExists(input.projectId);
+      if (!workspaceExists) {
+        return [];
+      }
+
+      // List all files
+      const files = await WorkspaceManager.listFiles(input.projectId);
+      return files;
+    }),
+
+  read: protectedProcedure
+    .input(z.object({ 
+      projectId: z.number(),
+      filePath: z.string(),
+    }))
+    .query(async ({ ctx, input }) => {
+      // Verify project ownership
+      const project = await db.getProjectById(input.projectId);
+      if (!project || project.userId !== ctx.user.id) {
+        throw new TRPCError({ code: "FORBIDDEN", message: "Access denied" });
+      }
+
+      try {
+        const content = await WorkspaceManager.readFile(input.projectId, input.filePath);
+        return {
+          filePath: input.filePath,
+          content,
+        };
+      } catch (error) {
+        throw new TRPCError({ 
+          code: "NOT_FOUND", 
+          message: "File not found" 
+        });
+      }
+    }),
+
+  download: protectedProcedure
+    .input(z.object({ 
+      projectId: z.number(),
+      filePath: z.string(),
+    }))
+    .query(async ({ ctx, input }) => {
+      // Verify project ownership
+      const project = await db.getProjectById(input.projectId);
+      if (!project || project.userId !== ctx.user.id) {
+        throw new TRPCError({ code: "FORBIDDEN", message: "Access denied" });
+      }
+
+      try {
+        const content = await WorkspaceManager.readFile(input.projectId, input.filePath);
+        return {
+          filePath: input.filePath,
+          content,
+          fileName: input.filePath.split('/').pop() || 'file.txt',
+        };
+      } catch (error) {
+        throw new TRPCError({ 
+          code: "NOT_FOUND", 
+          message: "File not found" 
+        });
+      }
+    }),
+
+  listFromDatabase: protectedProcedure
+    .input(z.object({ projectId: z.number() }))
+    .query(async ({ ctx, input }) => {
+      // Verify project ownership
+      const project = await db.getProjectById(input.projectId);
+      if (!project || project.userId !== ctx.user.id) {
+        throw new TRPCError({ code: "FORBIDDEN", message: "Access denied" });
+      }
       
       return await db.getProjectFiles(input.projectId);
     }),
