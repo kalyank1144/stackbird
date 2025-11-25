@@ -73,6 +73,15 @@ export function useSocket() {
       }));
     });
 
+    // Listen for code execution output
+    socket.on("execution:output", (data: { projectId: number; filePath: string; type: string; data: string }) => {
+      console.log("[Socket] Execution output:", data);
+      // Forward to terminal
+      if ((window as any).__terminalAddLine) {
+        (window as any).__terminalAddLine(data.type as "stdout" | "stderr", data.data);
+      }
+    });
+
     return () => {
       socket.disconnect();
     };

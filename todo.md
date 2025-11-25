@@ -76,3 +76,14 @@
 - [x] Add save button with keyboard shortcut (Ctrl+S)
 - [x] Show unsaved changes indicator
 - [x] Test file editing workflow
+
+## Phase 11: Code Execution & Terminal
+- [x] Create code execution API endpoint
+- [x] Implement sandboxed execution for different languages
+- [x] Add execution timeout and resource limits
+- [x] Stream execution output via WebSocket
+- [x] Build terminal panel UI component
+- [x] Add 'Run Code' button to editor
+- [x] Display stdout, stderr, and exit codes
+- [x] Add execution history
+- [x] Test code execution for multiple languages

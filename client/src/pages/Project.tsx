@@ -13,6 +13,7 @@ import { Link, useParams } from "wouter";
 import { toast } from "sonner";
 import { APP_TITLE, getLoginUrl } from "@/const";
 import FileBrowser from "@/components/FileBrowser";
+import Terminal from "@/components/Terminal";
 
 // Helper to get Monaco language from file path
 function getLanguageFromPath(path: string): string {
@@ -45,6 +46,7 @@ export default function Project() {
   const [selectedFile, setSelectedFile] = useState<{ path: string; content: string } | null>(null);
   const [editorContent, setEditorContent] = useState("");
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [isExecuting, setIsExecuting] = useState(false);
 
   const { data: project, isLoading: projectLoading } = trpc.projects.get.useQuery(
     { projectId },
@@ -60,6 +62,44 @@ export default function Project() {
     { conversationId: currentConversationId! },
     { enabled: !!currentConversationId }
   );
+
+  const executeCode = trpc.execution.run.useMutation({
+    onMutate: () => {
+      setIsExecuting(true);
+      // Add system message
+      if ((window as any).__terminalAddLine) {
+        (window as any).__terminalAddLine("system", `\n$ Executing ${selectedFile?.path}...\n`);
+      }
+    },
+    onSuccess: (result) => {
+      setIsExecuting(false);
+      // Add final output
+      if ((window as any).__terminalAddLine) {
+        if (result.stdout) {
+          (window as any).__terminalAddLine("stdout", result.stdout);
+        }
+        if (result.stderr) {
+          (window as any).__terminalAddLine("stderr", result.stderr);
+        }
+        (window as any).__terminalAddLine(
+          "system",
+          `\n[Process exited with code ${result.exitCode}]\n`
+        );
+      }
+      if (result.exitCode === 0) {
+        toast.success("Code executed successfully!");
+      } else {
+        toast.error(`Execution failed with code ${result.exitCode}`);
+      }
+    },
+    onError: (error) => {
+      setIsExecuting(false);
+      if ((window as any).__terminalAddLine) {
+        (window as any).__terminalAddLine("stderr", `\nError: ${error.message}\n`);
+      }
+      toast.error(`Execution error: ${error.message}`);
+    },
+  });
 
   const updateFile = trpc.files.update.useMutation({
     onSuccess: () => {
@@ -151,7 +191,10 @@ export default function Project() {
 
       {/* Main Workspace */}
       <div className="flex-1 overflow-hidden">
-        <ResizablePanelGroup direction="horizontal">
+        <ResizablePanelGroup direction="vertical">
+          {/* Top Section: File Browser + Editor + Chat */}
+          <ResizablePanel defaultSize={70} minSize={50}>
+            <ResizablePanelGroup direction="horizontal">
           {/* File Browser Panel */}
           <ResizablePanel defaultSize={25} minSize={20}>
             <div className="h-full flex flex-col border-r">
@@ -232,10 +275,10 @@ export default function Project() {
             </div>
           </ResizablePanel>
 
-          <ResizableHandle withHandle />
+              <ResizableHandle withHandle />
 
-          {/* AI Chat Panel */}
-          <ResizablePanel defaultSize={40} minSize={30}>
+              {/* AI Chat Panel */}
+              <ResizablePanel defaultSize={40} minSize={30}>
             <div className="h-full flex flex-col">
               <div className="border-b px-4 py-2 flex items-center justify-between">
                 <div className="flex items-center gap-2">
@@ -333,6 +376,27 @@ export default function Project() {
                 </p>
               </div>
             </div>
+              </ResizablePanel>
+            </ResizablePanelGroup>
+          </ResizablePanel>
+
+          <ResizableHandle withHandle />
+
+          {/* Bottom Section: Terminal */}
+          <ResizablePanel defaultSize={30} minSize={20}>
+            <Terminal
+              projectId={projectId}
+              filePath={selectedFile?.path || null}
+              onRun={() => {
+                if (selectedFile) {
+                  executeCode.mutate({
+                    projectId,
+                    filePath: selectedFile.path,
+                  });
+                }
+              }}
+              isRunning={isExecuting}
+            />
           </ResizablePanel>
         </ResizablePanelGroup>
       </div>

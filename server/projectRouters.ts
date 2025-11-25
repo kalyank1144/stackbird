@@ -6,6 +6,7 @@ import { AiderSession } from "./aider";
 import { WorkspaceManager } from "./workspace";
 import { ENV } from "./_core/env";
 import { emitToUser } from "./_core/socket";
+import { executeCode } from "./executor";
 
 export const projectRouter = router({
   create: protectedProcedure
@@ -200,6 +201,42 @@ export const chatRouter = router({
       }
       
       return await db.getProjectConversations(input.projectId);
+    }),
+});
+
+export const executionRouter = router({
+  run: protectedProcedure
+    .input(z.object({ 
+      projectId: z.number(), 
+      filePath: z.string(),
+      timeout: z.number().optional(),
+    }))
+    .mutation(async ({ ctx, input }) => {
+      // Verify project ownership
+      const project = await db.getProjectById(input.projectId);
+      if (!project || project.userId !== ctx.user.id) {
+        throw new TRPCError({ code: "FORBIDDEN", message: "Access denied" });
+      }
+
+      // Execute code with streaming output
+      const result = await executeCode(
+        {
+          projectId: input.projectId,
+          filePath: input.filePath,
+          timeout: input.timeout,
+        },
+        (data, type) => {
+          // Stream output to user via WebSocket
+          emitToUser(ctx.user.id, "execution:output", {
+            projectId: input.projectId,
+            filePath: input.filePath,
+            type,
+            data,
+          });
+        }
+      );
+
+      return result;
     }),
 });
 
