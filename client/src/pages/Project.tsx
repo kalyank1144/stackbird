@@ -7,7 +7,8 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { trpc } from "@/lib/trpc";
 import Editor from "@monaco-editor/react";
 import { ArrowLeft, Send, Loader2, MessageSquare, Code2, FileText } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useSocket } from "@/hooks/useSocket";
 import { Link, useParams } from "wouter";
 import { toast } from "sonner";
 import { APP_TITLE, getLoginUrl } from "@/const";
@@ -19,6 +20,7 @@ export default function Project() {
   const { user, loading: authLoading } = useAuth();
   const [message, setMessage] = useState("");
   const [currentConversationId, setCurrentConversationId] = useState<number | undefined>();
+  const { isConnected, streamingData, clearStreamingData } = useSocket();
 
   const { data: project, isLoading: projectLoading } = trpc.projects.get.useQuery(
     { projectId },
@@ -39,13 +41,20 @@ export default function Project() {
     onSuccess: (data) => {
       setCurrentConversationId(data.conversationId);
       setMessage("");
-      refetchMessages();
-      toast.success("Message sent!");
+      // Don't refetch immediately - wait for streaming to complete
     },
     onError: (error) => {
       toast.error(error.message);
     },
   });
+
+  // Refetch messages when streaming ends
+  useEffect(() => {
+    if (!streamingData.isStreaming && streamingData.conversationId === currentConversationId) {
+      refetchMessages();
+      clearStreamingData();
+    }
+  }, [streamingData.isStreaming, streamingData.conversationId, currentConversationId, refetchMessages, clearStreamingData]);
 
   if (authLoading || projectLoading) {
     return (
@@ -155,9 +164,17 @@ export default function Project() {
           {/* AI Chat Panel */}
           <ResizablePanel defaultSize={40} minSize={30}>
             <div className="h-full flex flex-col">
-              <div className="border-b px-4 py-2 flex items-center gap-2">
-                <MessageSquare className="h-4 w-4 text-primary" />
-                <span className="text-sm font-medium">AI Assistant</span>
+              <div className="border-b px-4 py-2 flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <MessageSquare className="h-4 w-4 text-primary" />
+                  <span className="text-sm font-medium">AI Assistant</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className={`h-2 w-2 rounded-full ${isConnected ? "bg-green-500" : "bg-gray-400"}`} />
+                  <span className="text-xs text-muted-foreground">
+                    {isConnected ? "Connected" : "Connecting..."}
+                  </span>
+                </div>
               </div>
 
               {/* Messages */}
@@ -195,6 +212,19 @@ export default function Project() {
                         </div>
                       </div>
                     ))}
+                    
+                    {/* Show streaming message */}
+                    {streamingData.isStreaming && streamingData.conversationId === currentConversationId && (
+                      <div className="flex justify-start">
+                        <div className="max-w-[80%] rounded-lg px-4 py-2 bg-muted">
+                          <p className="text-sm whitespace-pre-wrap">{streamingData.content}</p>
+                          <div className="flex items-center gap-2 mt-2">
+                            <Loader2 className="h-3 w-3 animate-spin" />
+                            <p className="text-xs opacity-70">Generating code...</p>
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 )}
               </ScrollArea>

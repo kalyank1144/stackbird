@@ -5,6 +5,7 @@ import { TRPCError } from "@trpc/server";
 import { AiderSession } from "./aider";
 import { WorkspaceManager } from "./workspace";
 import { ENV } from "./_core/env";
+import { emitToUser } from "./_core/socket";
 
 export const projectRouter = router({
   create: protectedProcedure
@@ -115,9 +116,21 @@ export const chatRouter = router({
 
         let aiResponse = "";
         
-        // Collect output from Aider
+        // Emit streaming start event
+        emitToUser(ctx.user.id, "ai:stream:start", {
+          conversationId,
+          projectId: input.projectId,
+        });
+        
+        // Collect output from Aider and stream to user
         aider.on("output", (data: string) => {
           aiResponse += data;
+          
+          // Stream chunk to user via WebSocket
+          emitToUser(ctx.user.id, "ai:stream:chunk", {
+            conversationId,
+            chunk: data,
+          });
         });
 
         // Start Aider and send message
@@ -135,6 +148,12 @@ export const chatRouter = router({
         
         // Save AI response
         await db.createMessage(conversationId, "assistant", cleanResponse);
+        
+        // Emit streaming end event
+        emitToUser(ctx.user.id, "ai:stream:end", {
+          conversationId,
+          response: cleanResponse,
+        });
 
         return {
           conversationId,
