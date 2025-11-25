@@ -1,21 +1,41 @@
 import { z } from "zod";
-import { protectedProcedure, router } from "./_core/trpc";
+import { protectedProcedure, publicProcedure, router } from "./_core/trpc";
 import * as db from "./db";
 import { TRPCError } from "@trpc/server";
 import { AiderSession } from "./aider";
 import { WorkspaceManager } from "./workspace";
 import { ENV } from "./_core/env";
+import { getTemplateById, getAllTemplates } from "./templates";
 import { emitToUser } from "./_core/socket";
 import { executeCode } from "./executor";
 
 export const projectRouter = router({
+  templates: publicProcedure.query(() => {
+    return getAllTemplates();
+  }),
+  
   create: protectedProcedure
     .input(z.object({
       name: z.string().min(1).max(255),
       description: z.string().optional(),
+      templateId: z.string().optional(),
     }))
     .mutation(async ({ ctx, input }) => {
       const projectId = await db.createProject(ctx.user.id, input.name, input.description);
+      
+      // Initialize workspace directory
+      const projectPath = WorkspaceManager.getProjectPath(projectId);
+      
+      // Apply template if specified
+      if (input.templateId) {
+        const template = getTemplateById(input.templateId);
+        if (template) {
+          for (const file of template.files) {
+            await WorkspaceManager.writeFile(projectId, file.path, file.content);
+          }
+        }
+      }
+      
       return { projectId };
     }),
 

@@ -87,3 +87,12 @@
 - [x] Display stdout, stderr, and exit codes
 - [x] Add execution history
 - [x] Test code execution for multiple languages
+
+## Phase 12: Project Templates
+- [x] Create template system architecture
+- [x] Define React template with boilerplate
+- [x] Define Express API template with boilerplate
+- [x] Define Flask API template with boilerplate
+- [x] Add template selection to project creation UI
+- [x] Implement template initialization logic
+- [x] Test all templates

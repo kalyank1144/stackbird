@@ -18,14 +18,17 @@ export default function Dashboard() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [projectName, setProjectName] = useState("");
   const [projectDescription, setProjectDescription] = useState("");
+  const [selectedTemplate, setSelectedTemplate] = useState<string | undefined>();
 
   const { data: projects, isLoading, refetch } = trpc.projects.list.useQuery();
+  const { data: templates } = trpc.projects.templates.useQuery();
   const createProject = trpc.projects.create.useMutation({
     onSuccess: () => {
       toast.success("Project created successfully!");
       setDialogOpen(false);
       setProjectName("");
       setProjectDescription("");
+      setSelectedTemplate(undefined);
       refetch();
     },
     onError: (error) => {
@@ -64,6 +67,7 @@ export default function Dashboard() {
     createProject.mutate({
       name: projectName,
       description: projectDescription || undefined,
+      templateId: selectedTemplate,
     });
   };
 
@@ -134,6 +138,36 @@ export default function Dashboard() {
                     value={projectDescription}
                     onChange={(e) => setProjectDescription(e.target.value)}
                   />
+                </div>
+                <div className="space-y-2">
+                  <Label>Template (Optional)</Label>
+                  <div className="grid grid-cols-1 gap-2">
+                    <Button
+                      type="button"
+                      variant={selectedTemplate === undefined ? "default" : "outline"}
+                      className="justify-start h-auto py-3 px-4"
+                      onClick={() => setSelectedTemplate(undefined)}
+                    >
+                      <div className="text-left">
+                        <div className="font-semibold">Blank Project</div>
+                        <div className="text-xs text-muted-foreground">Start from scratch</div>
+                      </div>
+                    </Button>
+                    {templates?.map((template) => (
+                      <Button
+                        key={template.id}
+                        type="button"
+                        variant={selectedTemplate === template.id ? "default" : "outline"}
+                        className="justify-start h-auto py-3 px-4"
+                        onClick={() => setSelectedTemplate(template.id)}
+                      >
+                        <div className="text-left">
+                          <div className="font-semibold">{template.name}</div>
+                          <div className="text-xs text-muted-foreground">{template.description}</div>
+                        </div>
+                      </Button>
+                    ))}
+                  </div>
                 </div>
               </div>
               <DialogFooter>
