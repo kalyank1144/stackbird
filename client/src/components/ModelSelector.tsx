@@ -88,9 +88,6 @@ export function ModelSelector({
             )}
           </div>
         </div>
-        <span className={`text-sm font-semibold ${getTierColor(model.tier)}`}>
-          {model.tokenCost} {model.tokenCost === 1 ? "token" : "tokens"}
-        </span>
       </div>
       <p className="text-xs text-muted-foreground">{model.description}</p>
     </DropdownMenuItem>
@@ -115,17 +112,7 @@ export function ModelSelector({
               </Badge>
             )}
           </div>
-          <div className="flex items-center gap-2">
-            <span
-              className={`text-sm font-semibold ${getTierColor(
-                selectedModel?.tier || ""
-              )}`}
-            >
-              {selectedModel?.tokenCost}{" "}
-              {selectedModel?.tokenCost === 1 ? "token" : "tokens"}
-            </span>
-            <ChevronDown className="h-4 w-4 opacity-50" />
-          </div>
+          <ChevronDown className="h-4 w-4 opacity-50" />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start" className="w-[400px]">

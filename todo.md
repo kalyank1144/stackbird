@@ -148,3 +148,6 @@
 - [ ] Test Stripe checkout flow
 - [ ] Test webhook events
 - [ ] Test token deduction with different models
+
+## Phase 16: UI Improvements
+- [x] Simplify model selector to hide token costs (focus on quality not pricing)
