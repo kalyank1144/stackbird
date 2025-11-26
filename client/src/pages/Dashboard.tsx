@@ -13,7 +13,7 @@ import { toast } from "sonner";
 import { APP_TITLE, getLoginUrl } from "@/const";
 
 export default function Dashboard() {
-  const { user, loading: authLoading, logout } = useAuth();
+  const { user, loading: authLoading } = useAuth(); // logout removed - no auth needed
   const [, setLocation] = useLocation();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [projectName, setProjectName] = useState("");
@@ -89,10 +89,7 @@ export default function Dashboard() {
             </nav>
           </div>
           <div className="flex items-center gap-4">
-            <span className="text-sm text-muted-foreground">{user.email}</span>
-            <Button variant="outline" size="sm" onClick={() => logout()}>
-              Sign Out
-            </Button>
+            <span className="text-sm text-muted-foreground">{user?.email || "Guest User"}</span>
           </div>
         </div>
       </header>

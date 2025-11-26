@@ -283,9 +283,19 @@
 - [ ] Test multi-turn conversations work correctly
 
 ## Phase 37: Deploy Stackbird to Production
-- [ ] Save checkpoint with streaming fix
-- [ ] Create GitHub repository and push code
-- [ ] Set up Supabase database tables via MCP
-- [ ] Configure deployment platform (Vercel/Railway/Render)
-- [ ] Set up environment variables for production
-- [ ] Test deployed application
+- [x] Save checkpoint with streaming fix
+- [x] Create GitHub repository and push code
+- [x] Set up Supabase database tables
+- [ ] Create Railway deployment configuration
+- [ ] Connect Railway to GitHub repository
+- [ ] Configure environment variables in Railway
+- [ ] Deploy and test application
+
+## Phase 38: Remove Authentication for Testing
+- [x] Remove OAuth middleware and checks
+- [x] Create default guest user system
+- [x] Update tRPC context to use guest user
+- [x] Update frontend to skip auth checks
+- [x] Remove login/logout UI elements
+- [x] Test all features work without auth
+- [ ] Deploy to Railway with minimal env vars
