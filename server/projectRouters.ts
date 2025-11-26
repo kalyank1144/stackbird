@@ -9,6 +9,8 @@ import { getTemplateById, getAllTemplates } from "./templates";
 import { emitToUser } from "./_core/socket";
 import { executeCode } from "./executor";
 import { GitHubIntegration } from "./github";
+import { hasEnoughCredits, deductCredits, getUserCredits, PLANS, canCreateProject } from "./subscription";
+import { getModelById, canUseModel, getDefaultModel } from "./models";
 
 export const projectRouter = router({
   templates: publicProcedure.query(() => {
@@ -22,6 +24,19 @@ export const projectRouter = router({
       templateId: z.string().optional(),
     }))
     .mutation(async ({ ctx, input }) => {
+      // Check project limit
+      const userProjects = await db.getUserProjects(ctx.user.id);
+      const canCreate = await canCreateProject(ctx.user.id, userProjects.length);
+      if (!canCreate) {
+        const userCredits = await getUserCredits(ctx.user.id);
+        const plan = userCredits.plan as "free" | "pro";
+        const planConfig = PLANS[plan];
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: `You've reached your project limit (${planConfig.maxProjects} projects). Upgrade to Pro for ${PLANS.pro.maxProjects} projects!`,
+        });
+      }
+
       const projectId = await db.createProject(ctx.user.id, input.name, input.description);
       
       // Initialize workspace directory
@@ -89,8 +104,40 @@ export const chatRouter = router({
       projectId: z.number(),
       conversationId: z.number().optional(),
       message: z.string().min(1),
+      modelId: z.string().optional(),
     }))
     .mutation(async ({ ctx, input }) => {
+      // Determine which model to use
+      const userCredits = await getUserCredits(ctx.user.id);
+      const userPlan = userCredits.plan as "free" | "pro";
+      const requestedModelId = input.modelId || getDefaultModel(userPlan).id;
+      
+      // Check if user can use this model
+      if (!canUseModel(userPlan, requestedModelId)) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "This model is only available for Pro users. Upgrade to access all models!",
+        });
+      }
+      
+      const model = getModelById(requestedModelId);
+      if (!model) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Invalid model selected",
+        });
+      }
+      
+      // Check if user has enough tokens for this model
+      const hasCredits = await hasEnoughCredits(ctx.user.id, model.tokenCost);
+      if (!hasCredits) {
+        const planConfig = PLANS[userPlan];
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: `Not enough tokens! You need ${model.tokenCost} tokens but only have ${userCredits.remaining} left. ${userPlan === "free" ? "Upgrade to Pro for 5,000 tokens/month!" : `Resets ${planConfig.resetPeriod === "daily" ? "tomorrow" : "next month"}.`}`,
+        });
+      }
+
       // Verify project ownership
       const project = await db.getProjectById(input.projectId);
       if (!project || project.userId !== ctx.user.id) {
@@ -170,6 +217,12 @@ export const chatRouter = router({
         
         // Save AI response
         await db.createMessage(conversationId, "assistant", cleanResponse);
+        
+        // Deduct tokens based on model cost
+        await deductCredits(ctx.user.id, model.tokenCost, "ai_message", {
+          projectId: input.projectId,
+          conversationId,
+        });
         
         // Emit streaming end event
         emitToUser(ctx.user.id, "ai:stream:end", {
@@ -294,8 +347,8 @@ export const githubRouter = router({
 
 export const executionRouter = router({
   run: protectedProcedure
-    .input(z.object({ 
-      projectId: z.number(), 
+    .input(z.object({
+      projectId: z.number(),
       filePath: z.string(),
       timeout: z.number().optional(),
     }))

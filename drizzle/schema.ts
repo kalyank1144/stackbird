@@ -26,7 +26,60 @@ export type User = typeof users.$inferSelect;
 export type InsertUser = typeof users.$inferInsert;
 
 /**
- * Projects table - stores user's code generation projects
+ * Subscription plans and billing
+ */
+export const subscriptions = mysqlTable("subscriptions", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull().references(() => users.id, { onDelete: "cascade" }),
+  plan: mysqlEnum("plan", ["free", "pro"]).default("free").notNull(),
+  status: mysqlEnum("status", ["active", "canceled", "past_due", "trialing"]).default("active").notNull(),
+  stripeCustomerId: varchar("stripeCustomerId", { length: 255 }),
+  stripeSubscriptionId: varchar("stripeSubscriptionId", { length: 255 }),
+  stripePriceId: varchar("stripePriceId", { length: 255 }),
+  currentPeriodStart: timestamp("currentPeriodStart"),
+  currentPeriodEnd: timestamp("currentPeriodEnd"),
+  cancelAtPeriodEnd: int("cancelAtPeriodEnd").default(0).notNull(), // boolean as int
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type Subscription = typeof subscriptions.$inferSelect;
+export type InsertSubscription = typeof subscriptions.$inferInsert;
+
+/**
+ * User credits for AI usage
+ */
+export const credits = mysqlTable("credits", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull().unique().references(() => users.id, { onDelete: "cascade" }),
+  remaining: int("remaining").default(10).notNull(), // Free tier gets 10/day
+  total: int("total").default(10).notNull(), // Total credits for current period
+  resetDate: timestamp("resetDate").notNull(), // When credits reset (daily for free, monthly for pro)
+  plan: mysqlEnum("plan", ["free", "pro"]).default("free").notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type Credits = typeof credits.$inferSelect;
+export type InsertCredits = typeof credits.$inferInsert;
+
+/**
+ * Usage logs for analytics and billing
+ */
+export const usageLogs = mysqlTable("usage_logs", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull().references(() => users.id, { onDelete: "cascade" }),
+  action: mysqlEnum("action", ["ai_message", "code_execution", "file_operation"]).notNull(),
+  creditsUsed: int("creditsUsed").default(1).notNull(),
+  metadata: text("metadata"), // JSON string for additional data
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type UsageLog = typeof usageLogs.$inferSelect;
+export type InsertUsageLog = typeof usageLogs.$inferInsert;
+
+/**
+ * User's code generation projects
  */
 export const projects = mysqlTable("projects", {
   id: int("id").autoincrement().primaryKey(),

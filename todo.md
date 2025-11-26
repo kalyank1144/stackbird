@@ -106,3 +106,45 @@
 - [x] Add "Push to GitHub" button in Project page
 - [x] Add GitHub connection status indicator
 - [x] Test GitHub integration end-to-end
+
+## Phase 14: Subscription & Monetization System
+- [x] Design subscriptions table (userId, plan, status, period)
+- [x] Design usage_logs table (userId, action, credits, timestamp)
+- [x] Design credits table (userId, remaining, resetDate, plan)
+- [x] Push database migrations
+- [x] Create subscription management helper functions
+- [x] Implement credit tracking system
+- [x] Add usage middleware to check credits before AI calls
+- [x] Implement credit deduction logic
+- [x] Add daily/monthly credit reset logic
+- [ ] Install Stripe SDK
+- [ ] Set up Stripe webhook endpoint
+- [ ] Create Stripe checkout session API
+- [ ] Create subscription management API (upgrade/cancel)
+- [ ] Build pricing page UI
+- [ ] Build subscription dashboard UI
+- [ ] Add usage stats display
+- [ ] Add upgrade prompts when credits run low
+- [ ] Implement feature limits (project count)
+- [ ] Add subscription status checks across app
+- [ ] Write tests for subscription system
+- [ ] Test Stripe integration end-to-end
+
+## Phase 15: Token-Based System & Stripe Integration
+- [x] Update PLANS config to use tokens instead of messages
+- [x] Create models.ts with 4 AI models configuration
+- [x] Update credit deduction to use model token costs
+- [x] Add model parameter to chat API
+- [x] Install Stripe SDK
+- [x] Add Stripe secrets to environment
+- [ ] Create Stripe checkout session API
+- [ ] Create Stripe webhook endpoint
+- [ ] Handle subscription created/updated/canceled events
+- [ ] Build pricing page UI with monthly/yearly toggle
+- [ ] Build subscription dashboard UI
+- [ ] Add model selector in chat interface
+- [ ] Add usage stats display (tokens used/remaining)
+- [ ] Add upgrade prompts when low on tokens
+- [ ] Test Stripe checkout flow
+- [ ] Test webhook events
+- [ ] Test token deduction with different models
