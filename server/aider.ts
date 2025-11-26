@@ -36,7 +36,8 @@ export class AiderSession extends EventEmitter {
    */
   async start(): Promise<void> {
     return new Promise((resolve, reject) => {
-      const aiderPath = path.join(process.cwd(), "venv", "bin", "aider");
+      // Use system-installed aider
+      const aiderPath = "aider";
       
       const args = [
         "--model", this.model,
@@ -83,8 +84,9 @@ export class AiderSession extends EventEmitter {
       });
 
       this.process.on("error", (error) => {
+        console.error("[Aider] Process error:", error);
         this.emit("process-error", error);
-        reject(error);
+        reject(new Error(`Failed to start Aider: ${error.message}`));
       });
 
       this.process.on("exit", (code) => {

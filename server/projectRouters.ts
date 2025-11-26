@@ -243,10 +243,30 @@ export const chatRouter = router({
           response: cleanResponse,
         };
       } catch (error) {
-        console.error("Aider execution error:", error);
-        const errorMessage = `Error: ${error instanceof Error ? error.message : "Failed to generate code"}`;
-        await db.createMessage(conversationId, "assistant", errorMessage);
+        console.error("[Chat] Aider execution error:", error);
         
+        // Ensure we always return a proper error message
+        const errorMessage = error instanceof Error 
+          ? `Error: ${error.message}` 
+          : "Error: Failed to generate code. Please try again.";
+        
+        try {
+          await db.createMessage(conversationId, "assistant", errorMessage);
+        } catch (dbError) {
+          console.error("[Chat] Failed to save error message:", dbError);
+        }
+        
+        // Emit error event to user
+        try {
+          emitToUser(ctx.user.id, "ai:stream:error", {
+            conversationId,
+            error: errorMessage,
+          });
+        } catch (socketError) {
+          console.error("[Chat] Failed to emit error event:", socketError);
+        }
+        
+        // Always return a valid JSON response
         return {
           conversationId,
           response: errorMessage,
