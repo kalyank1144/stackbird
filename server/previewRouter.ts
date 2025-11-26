@@ -25,8 +25,13 @@ export const previewRouter = router({
         throw new Error("Project not found");
       }
       
-      // Return preview URL
-      const baseUrl = process.env.VITE_FRONTEND_FORGE_API_URL || "http://localhost:3000";
+      // Build preview URL using the request's host
+      // This ensures preview works in both development and production
+      // Check X-Forwarded-Proto for proxied requests (like Manus dev server)
+      const protocol = ctx.req.get('x-forwarded-proto') || ctx.req.protocol || 'https';
+      const host = ctx.req.get('host') || 'localhost:3000';
+      const baseUrl = `${protocol}://${host}`;
+      
       return {
         url: `/api/preview/${projectId}/`,
         fullUrl: `${baseUrl}/api/preview/${projectId}/`,

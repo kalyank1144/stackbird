@@ -263,3 +263,15 @@
 - [x] Add proper scroll container to chat messages area
 - [x] Keep input field fixed at bottom
 - [x] Test scroll behavior with long conversations
+
+## Phase 34: Debug Live Preview 404 Error
+- [x] Check if files are being saved to workspace directory
+- [x] Verify preview URL format is correct
+- [x] Test preview server middleware is working
+- [x] Fix preview URL to use request host instead of hardcoded URL
+- [x] Test with real HTML project
+
+## Phase 35: Fix Preview Mixed Content Error (HTTP vs HTTPS)
+- [x] Fix preview URL to use HTTPS instead of HTTP
+- [x] Handle X-Forwarded-Proto header for proxied requests
+- [x] Test preview loads correctly over HTTPS
