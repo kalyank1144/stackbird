@@ -7,6 +7,7 @@ export interface AIModel {
   id: string;
   name: string;
   provider: "deepseek" | "openai" | "anthropic" | "google";
+  aiderModelName: string; // The exact model name that Aider CLI expects
   tokenCost: number; // How many tokens this model costs per message
   tier: "ultra-budget" | "budget" | "balanced" | "premium";
   features: string[];
@@ -21,6 +22,7 @@ export const AVAILABLE_MODELS: Record<string, AIModel> = {
     id: "deepseek-v3.2",
     name: "DeepSeek V3.2",
     provider: "deepseek",
+    aiderModelName: "deepseek/deepseek-chat",
     tokenCost: 0.5,
     tier: "ultra-budget",
     features: ["Fast", "Ultra-cheap", "Good for simple tasks"],
@@ -32,6 +34,7 @@ export const AVAILABLE_MODELS: Record<string, AIModel> = {
     id: "gpt-4o-mini",
     name: "GPT-4o Mini",
     provider: "openai",
+    aiderModelName: "gpt-4o-mini",
     tokenCost: 1,
     tier: "budget",
     features: ["Fast", "Reliable", "OpenAI quality"],
@@ -44,18 +47,21 @@ export const AVAILABLE_MODELS: Record<string, AIModel> = {
     id: "claude-3.5-sonnet",
     name: "Claude 3.5 Sonnet",
     provider: "anthropic",
+    aiderModelName: "claude-3-5-sonnet-20241022",
     tokenCost: 3,
     tier: "balanced",
     features: ["Best for coding", "Balanced performance", "Popular choice"],
     description: "The most popular choice for code generation and complex tasks",
     recommended: true,
     badge: "BEST",
+    availableForFree: true, // Available since we have API key configured
   },
   
   "claude-opus-4.5": {
     id: "claude-opus-4.5",
     name: "Claude Opus 4.5",
     provider: "anthropic",
+    aiderModelName: "claude-3-opus-20240229",
     tokenCost: 10,
     tier: "premium",
     features: ["Best in class", "Maximum quality", "Complex projects"],
@@ -67,6 +73,7 @@ export const AVAILABLE_MODELS: Record<string, AIModel> = {
     id: "gemini-2.0-flash-exp",
     name: "Gemini 2.0 Flash",
     provider: "google",
+    aiderModelName: "gemini/gemini-2.0-flash-exp",
     tokenCost: 1,
     tier: "budget",
     features: ["Fast", "Multimodal", "Google quality"],
@@ -78,6 +85,7 @@ export const AVAILABLE_MODELS: Record<string, AIModel> = {
     id: "claude-3-5-haiku-20241022",
     name: "Claude 3.5 Haiku",
     provider: "anthropic",
+    aiderModelName: "claude-3-5-haiku-20241022",
     tokenCost: 0.5,
     tier: "ultra-budget",
     features: ["Ultra fast", "Cost effective", "Smart responses"],

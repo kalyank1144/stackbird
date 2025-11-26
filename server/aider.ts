@@ -1,4 +1,4 @@
-import { spawn } from "child_process";
+import { spawn, ChildProcess, execSync } from "child_process";
 import { EventEmitter } from "events";
 import path from "path";
 
@@ -33,31 +33,73 @@ export class AiderSession extends EventEmitter {
 
   /**
    * Start Aider process
+   * @param addFiles - Optional array of file paths to add to Aider's context
    */
-  async start(): Promise<void> {
+  async start(addFiles?: string[]): Promise<void> {
     return new Promise((resolve, reject) => {
-      // Use system-installed aider
-      const aiderPath = "aider";
+      // Use python -m aider as recommended by official docs
+      // https://aider.chat/docs/troubleshooting/aider-not-found.html
+      const pythonPath = "/usr/bin/python3.11";
       
       const args = [
+        "-m", "aider",
         "--model", this.model,
         "--no-auto-commits",
         "--yes-always",
       ];
+      
+      // Add files to context if provided
+      if (addFiles && addFiles.length > 0) {
+        console.log(`[Aider] Adding ${addFiles.length} files to context`);
+        for (const file of addFiles) {
+          args.push("--file", file);
+        }
+      }
+      
+      console.log(`[Aider] Starting with command: ${pythonPath} ${args.join(" ")}`);
+      console.log(`[Aider] Python version check...`);
+      // Test Python can start
+      try {
+        const pythonVersion = execSync(`${pythonPath} --version 2>&1`).toString().trim();
+        console.log(`[Aider] ${pythonVersion}`);
+      } catch (e) {
+        console.error(`[Aider] Failed to check Python version:`, e);
+      }
+      console.log(`[Aider] Working directory: ${this.projectPath}`);
+      console.log(`[Aider] Model: ${this.model}`);
 
-      const env = { ...process.env };
+      const env: Record<string, string> = { 
+        ...process.env as Record<string, string>,
+        // Set Python environment to prevent "No module named 'encodings'" error
+        PYTHONHOME: "/usr",
+        PYTHONPATH: "/usr/lib/python311.zip:/usr/lib/python3.11:/usr/lib/python3.11/lib-dynload:/usr/local/lib/python3.11/dist-packages:/usr/lib/python3/dist-packages",
+        // Ensure UTF-8 encoding
+        PYTHONIOENCODING: "utf-8",
+        LC_ALL: "C.UTF-8",
+        LANG: "C.UTF-8",
+      };
+      
+      console.log(`[Aider] Environment: PYTHONHOME=${env.PYTHONHOME}`);
+      console.log(`[Aider] PYTHONPATH=${env.PYTHONPATH}`);
       if (this.apiKey) {
         // Set API key based on model provider
-        if (this.model.startsWith("gemini")) {
+        // Check for provider prefix or model name patterns
+        if (this.model.includes("gemini") || this.model.includes("google")) {
           env.GEMINI_API_KEY = this.apiKey;
-        } else if (this.model.startsWith("claude")) {
+          console.log(`[Aider] Set GEMINI_API_KEY`);
+        } else if (this.model.includes("claude") || this.model.includes("anthropic")) {
           env.ANTHROPIC_API_KEY = this.apiKey;
+          console.log(`[Aider] Set ANTHROPIC_API_KEY`);
+        } else if (this.model.includes("deepseek")) {
+          env.DEEPSEEK_API_KEY = this.apiKey;
+          console.log(`[Aider] Set DEEPSEEK_API_KEY`);
         } else {
           env.OPENAI_API_KEY = this.apiKey;
+          console.log(`[Aider] Set OPENAI_API_KEY`);
         }
       }
 
-      this.process = spawn(aiderPath, args, {
+      this.process = spawn(pythonPath, args, {
         cwd: this.projectPath,
         env,
         stdio: ["pipe", "pipe", "pipe"],
@@ -65,6 +107,7 @@ export class AiderSession extends EventEmitter {
 
       this.process.stdout?.on("data", (data: Buffer) => {
         const text = data.toString();
+        console.log(`[Aider] stdout:`, text.trim());
         this.buffer += text;
         this.emit("output", text);
       });
@@ -79,7 +122,9 @@ export class AiderSession extends EventEmitter {
           text.includes("fd=");
         
         if (!isProgressOrWarning) {
-          this.emit("error", text);
+          // Emit as stderr instead of error to avoid unhandled error crashes
+          this.emit("stderr", text);
+          console.error(`[Aider] stderr:`, text.trim());
         }
       });
 
@@ -89,7 +134,8 @@ export class AiderSession extends EventEmitter {
         reject(new Error(`Failed to start Aider: ${error.message}`));
       });
 
-      this.process.on("exit", (code) => {
+      this.process.on("exit", (code, signal) => {
+        console.log(`[Aider] Process exited with code ${code}, signal ${signal}`);
         this.emit("exit", code);
       });
 

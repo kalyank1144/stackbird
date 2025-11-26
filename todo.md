@@ -176,3 +176,42 @@
 - [x] Identify root cause (server crash causing HTML responses)
 - [x] Restart server to clear crashed state
 - [x] Test dashboard page loads successfully
+
+## Phase 21: Fix Persistent Chat 502 Error
+- [x] Check server logs for actual error (ERR_UNHANDLED_ERROR from Aider)
+- [x] Verify Aider is properly configured and can start
+- [x] Fix root cause: Changed 'error' event to 'stderr' to avoid crashes
+- [x] Added stderr listener in chat.send to capture Aider errors
+- [x] Fixed aider shebang to use python3.11 instead of python
+- [ ] Test chat functionality with real message (ready for testing)
+
+## Phase 22: Fix Stream Destruction and Model Availability
+- [x] Fix "Cannot call write after stream was destroyed" error (reduced wait time to 2s)
+- [x] Fix Claude 3.5 Sonnet showing as Pro-only (marked as availableForFree)
+- [x] Server restarted with all fixes applied
+- [ ] Test chat works with all models (waiting for user test)
+
+## Phase 23: Fix Aider Python Module Loading
+- [x] Set absolute path to /usr/local/bin/aider
+- [x] Add PYTHONPATH to aider spawn environment
+- [x] Server restarted with PYTHONPATH fix
+- [ ] Test aider execution from Node.js (waiting for user test)
+- [ ] Verify chat works end-to-end (waiting for user test)
+
+## Phase 24: Use python -m aider (Official Fix)
+- [x] Change spawn from /usr/local/bin/aider to python3.11 -m aider
+- [x] Add detailed logging for debugging
+- [x] Refactor chat.send to return immediately (async processing)
+- [ ] Test chat works end-to-end (ready for testing)
+
+## Phase 25: Fix Python Environment (PYTHONHOME)
+- [x] Find Python 3.11's PYTHONHOME path (/usr)
+- [x] Set PYTHONHOME, PYTHONPATH, and UTF-8 locale in spawn env
+- [ ] Test chat works without encoding errors (ready for testing)
+
+## Phase 26: Fix Aider Configuration (Model Names & Git Repo)
+- [x] Research correct aider model names for all models
+- [x] Update model configuration with aider-compatible names
+- [x] Initialize git repo in each project workspace
+- [x] Add project files to aider context when starting
+- [ ] Test code generation works end-to-end

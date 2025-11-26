@@ -164,6 +164,10 @@ export const chatRouter = router({
 
       // Get workspace path
       const projectPath = WorkspaceManager.getProjectPath(input.projectId);
+      
+      // List all files in workspace to add to Aider context
+      const workspaceFiles = await WorkspaceManager.listFiles(input.projectId);
+      console.log(`[Chat] Found ${workspaceFiles.length} files in workspace`);
 
       // Skip Aider execution in test mode
       if (process.env.NODE_ENV === "test" || process.env.VITEST) {
@@ -187,7 +191,7 @@ export const chatRouter = router({
         // Create Aider session with selected model
         const aider = new AiderSession({
           projectPath,
-          model: model.id, // Use the selected model
+          model: model.aiderModelName, // Use the Aider-compatible model name
           apiKey, // Use appropriate API key
         });
 
@@ -209,38 +213,72 @@ export const chatRouter = router({
             chunk: data,
           });
         });
-
-        // Start Aider and send message
-        await aider.start();
-        await aider.sendMessage(input.message);
         
-        // Wait for response (5 seconds)
-        await new Promise((resolve) => setTimeout(resolve, 5000));
-        
-        // Stop Aider
-        await aider.stop();
-
-        // Clean up the response
-        const cleanResponse = aiResponse.trim() || "Code generation completed. Check your project files.";
-        
-        // Save AI response
-        await db.createMessage(conversationId, "assistant", cleanResponse);
-        
-        // Deduct tokens based on model cost
-        await deductCredits(ctx.user.id, model.tokenCost, "ai_message", {
-          projectId: input.projectId,
-          conversationId,
-        });
-        
-        // Emit streaming end event
-        emitToUser(ctx.user.id, "ai:stream:end", {
-          conversationId,
-          response: cleanResponse,
+        // Listen to stderr to capture any errors
+        aider.on("stderr", (data: string) => {
+          console.warn("[Chat] Aider stderr:", data);
+          aiResponse += "\n[Error] " + data;
         });
 
+        // Start Aider and send message asynchronously
+        // Don't await - let it process in background to avoid stream timeout
+        (async () => {
+          try {
+            // Start Aider with all workspace files in context
+            await aider.start(workspaceFiles);
+            console.log("[Chat] Aider started with files, sending message");
+            await aider.sendMessage(input.message);
+            
+            // Wait for aider to finish processing (30 seconds max)
+            await new Promise((resolve) => setTimeout(resolve, 30000));
+            
+            // Stop Aider
+            try {
+              await aider.stop();
+            } catch (stopError) {
+              console.warn("[Chat] Error stopping Aider:", stopError);
+            }
+
+            // Clean up the response
+            const cleanResponse = aiResponse.trim() || "Code generation completed. Check your project files.";
+            
+            // Save AI response
+            await db.createMessage(conversationId, "assistant", cleanResponse);
+            
+            // Deduct tokens based on model cost
+            await deductCredits(ctx.user.id, model.tokenCost, "ai_message", {
+              projectId: input.projectId,
+              conversationId,
+            });
+            
+            // Emit streaming end event
+            emitToUser(ctx.user.id, "ai:stream:end", {
+              conversationId,
+              response: cleanResponse,
+            });
+          } catch (asyncError) {
+            console.error("[Chat] Async aider error:", asyncError);
+            const errorMessage = asyncError instanceof Error 
+              ? `Error: ${asyncError.message}` 
+              : "Error: Failed to generate code.";
+            
+            try {
+              await db.createMessage(conversationId, "assistant", errorMessage);
+            } catch (dbError) {
+              console.error("[Chat] Failed to save error:", dbError);
+            }
+            
+            emitToUser(ctx.user.id, "ai:stream:error", {
+              conversationId,
+              error: errorMessage,
+            });
+          }
+        })();
+
+        // Return immediately to prevent stream timeout
         return {
           conversationId,
-          response: cleanResponse,
+          status: "processing",
         };
       } catch (error) {
         console.error("[Chat] Aider execution error:", error);
