@@ -151,3 +151,9 @@
 
 ## Phase 16: UI Improvements
 - [x] Simplify model selector to hide token costs (focus on quality not pricing)
+
+## Phase 17: Add Gemini Model for Testing
+- [x] Add Gemini API key to environment
+- [x] Add Gemini 2.5 Flash to models configuration
+- [x] Update Aider to support Gemini models
+- [ ] Test code generation with Gemini (waiting for quota reset)

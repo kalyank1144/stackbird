@@ -62,6 +62,17 @@ export const AVAILABLE_MODELS: Record<string, AIModel> = {
     description: "Anthropic's most powerful model, best in the world for coding (released Nov 2025)",
     badge: "NEW",
   },
+  
+  "gemini-2.0-flash-exp": {
+    id: "gemini-2.0-flash-exp",
+    name: "Gemini 2.0 Flash",
+    provider: "google",
+    tokenCost: 1,
+    tier: "budget",
+    features: ["Fast", "Multimodal", "Google quality"],
+    description: "Google's latest flash model with excellent speed and quality",
+    availableForFree: true,
+  },
 };
 
 /**

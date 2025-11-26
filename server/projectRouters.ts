@@ -176,11 +176,17 @@ export const chatRouter = router({
       }
 
       try {
+        // Determine which API key to use based on model provider
+        let apiKey = ENV.forgeApiKey; // Default to built-in API key
+        if (model.provider === "google") {
+          apiKey = process.env.GEMINI_API_KEY || ENV.forgeApiKey;
+        }
+        
         // Create Aider session with selected model
         const aider = new AiderSession({
           projectPath,
           model: model.id, // Use the selected model
-          apiKey: ENV.forgeApiKey, // Use built-in API key
+          apiKey, // Use appropriate API key
         });
 
         let aiResponse = "";

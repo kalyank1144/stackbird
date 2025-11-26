@@ -46,7 +46,12 @@ export class AiderSession extends EventEmitter {
 
       const env = { ...process.env };
       if (this.apiKey) {
-        env.OPENAI_API_KEY = this.apiKey;
+        // Set API key based on model provider
+        if (this.model.startsWith("gemini")) {
+          env.GEMINI_API_KEY = this.apiKey;
+        } else {
+          env.OPENAI_API_KEY = this.apiKey;
+        }
       }
 
       this.process = spawn(aiderPath, args, {
