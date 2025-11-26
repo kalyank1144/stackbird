@@ -106,3 +106,14 @@ temp/
 *.sqlite
 *.sqlite3
 .aider*
+
+# Python virtual environment
+venv/
+__pycache__/
+*.py[cod]
+
+# Project workspaces (user-generated content)
+workspaces/
+
+# Screenshots
+screenshots/
