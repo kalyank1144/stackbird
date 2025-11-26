@@ -299,3 +299,8 @@
 - [x] Remove login/logout UI elements
 - [x] Test all features work without auth
 - [ ] Deploy to Railway with minimal env vars
+
+## Phase 39: Fix TypeScript Build Error for Railway Deployment
+- [x] Fix TypeScript error in server/aider.ts line 146 (null assignment issue)
+- [x] Test build locally to verify fix
+- [ ] Push fix to GitHub for Railway deployment
