@@ -303,4 +303,9 @@
 ## Phase 39: Fix TypeScript Build Error for Railway Deployment
 - [x] Fix TypeScript error in server/aider.ts line 146 (null assignment issue)
 - [x] Test build locally to verify fix
-- [ ] Push fix to GitHub for Railway deployment
+- [x] Push fix to GitHub for Railway deployment
+
+## Phase 40: Fix Remaining Path.resolve Errors
+- [x] Find all remaining import.meta.dirname references (found in vite.config.ts)
+- [x] Fix all path.resolve calls with undefined arguments (fixed vite.config.ts)
+- [ ] Test build and push to GitHub for Railway deployment
