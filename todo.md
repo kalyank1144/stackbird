@@ -275,3 +275,17 @@
 - [x] Fix preview URL to use HTTPS instead of HTTP
 - [x] Handle X-Forwarded-Proto header for proxied requests
 - [x] Test preview loads correctly over HTTPS
+
+## Phase 36: Fix Chat Streaming Error on Follow-up Messages
+- [x] Investigate streamingData undefined error
+- [x] Fix streaming state initialization
+- [x] Add null checks for streamingData access
+- [ ] Test multi-turn conversations work correctly
+
+## Phase 37: Deploy Stackbird to Production
+- [ ] Save checkpoint with streaming fix
+- [ ] Create GitHub repository and push code
+- [ ] Set up Supabase database tables via MCP
+- [ ] Configure deployment platform (Vercel/Railway/Render)
+- [ ] Set up environment variables for production
+- [ ] Test deployed application

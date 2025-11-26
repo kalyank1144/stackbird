@@ -192,7 +192,10 @@ export default function Project() {
 
   // Refetch messages when streaming ends and refresh preview
   useEffect(() => {
-    if (!streamingData.isStreaming && streamingData.conversationId === currentConversationId) {
+    // Only refetch if streaming just ended for the current conversation
+    if (!streamingData.isStreaming && 
+        streamingData.conversationId !== null && 
+        streamingData.conversationId === currentConversationId) {
       refetchMessages();
       refetchFiles();
       clearStreamingData();
