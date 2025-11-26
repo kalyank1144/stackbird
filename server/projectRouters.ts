@@ -180,6 +180,8 @@ export const chatRouter = router({
         let apiKey = ENV.forgeApiKey; // Default to built-in API key
         if (model.provider === "google") {
           apiKey = process.env.GEMINI_API_KEY || ENV.forgeApiKey;
+        } else if (model.provider === "anthropic") {
+          apiKey = process.env.ANTHROPIC_API_KEY || ENV.forgeApiKey;
         }
         
         // Create Aider session with selected model

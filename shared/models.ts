@@ -73,6 +73,17 @@ export const AVAILABLE_MODELS: Record<string, AIModel> = {
     description: "Google's latest flash model with excellent speed and quality",
     availableForFree: true,
   },
+  
+  "claude-3-5-haiku-20241022": {
+    id: "claude-3-5-haiku-20241022",
+    name: "Claude 3.5 Haiku",
+    provider: "anthropic",
+    tokenCost: 0.5,
+    tier: "ultra-budget",
+    features: ["Ultra fast", "Cost effective", "Smart responses"],
+    description: "Anthropic's fastest model with impressive intelligence at lowest cost",
+    availableForFree: true,
+  },
 };
 
 /**

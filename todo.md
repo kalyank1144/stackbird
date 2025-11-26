@@ -157,3 +157,9 @@
 - [x] Add Gemini 2.5 Flash to models configuration
 - [x] Update Aider to support Gemini models
 - [ ] Test code generation with Gemini (waiting for quota reset)
+
+## Phase 18: Add Claude Models for Testing
+- [x] Add Claude API key to environment
+- [x] Add Claude Haiku 3.5 to models configuration
+- [x] Update Aider to support Claude API key
+- [x] Test Claude API connectivity (all 5 tests passed)

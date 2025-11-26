@@ -49,6 +49,8 @@ export class AiderSession extends EventEmitter {
         // Set API key based on model provider
         if (this.model.startsWith("gemini")) {
           env.GEMINI_API_KEY = this.apiKey;
+        } else if (this.model.startsWith("claude")) {
+          env.ANTHROPIC_API_KEY = this.apiKey;
         } else {
           env.OPENAI_API_KEY = this.apiKey;
         }
