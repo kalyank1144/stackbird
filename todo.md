@@ -228,3 +228,19 @@
 - [x] Filter hidden files from Aider context
 - [x] Add .aider* to .gitignore to prevent future issues
 - [x] Test Aider starts without encoding errors
+
+## Phase 29: Redesign Project Interface for Better UX
+- [x] Fix chat interface disappearing after output
+- [x] Simplify layout - remove or hide code editor initially
+- [x] Make chat always visible and accessible
+- [x] Create mockups for 3 layout options
+- [x] Get user selection (Option 1: Bolt.new style)
+- [x] Implement Bolt.new style layout
+- [x] Add Preview/Code tabs functionality
+- [x] Integrate live preview pane
+- [x] Test new interface with real usage
+
+## Phase 30: Add GitHub Integration to New Layout
+- [x] Add GitHub button next to Deploy button in header
+- [x] Integrate existing GitHub dialog functionality
+- [ ] Test GitHub push workflow
