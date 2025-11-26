@@ -118,12 +118,9 @@ export function getModelsForPlan(plan: "free" | "pro"): AIModel[] {
  * Get default model for a plan
  */
 export function getDefaultModel(plan: "free" | "pro"): AIModel {
-  if (plan === "free") {
-    return AVAILABLE_MODELS["gpt-4o-mini"]!;
-  }
-  
-  // Pro users get Claude Sonnet as default (best for coding)
-  return AVAILABLE_MODELS["claude-3.5-sonnet"]!;
+  // Use Claude 3.5 Haiku as default - it has a working API key
+  // Fast, cost-effective, and reliable for code generation
+  return AVAILABLE_MODELS["claude-3-5-haiku-20241022"]!;
 }
 
 /**

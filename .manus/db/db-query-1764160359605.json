@@ -1,0 +1,9 @@
+{
+  "query": "INSERT INTO subscriptions (userId, plan, status) VALUES ((SELECT id FROM users WHERE email = 'kalyanmncl15@gmail.com'), 'pro', 'active')",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2A3NTnUGoJXxPqe.6d3ff4ccfff9 --database ZHaFUAeqZJ8Zmr7GWk7tSr --execute INSERT INTO subscriptions (userId, plan, status) VALUES ((SELECT id FROM users WHERE email = 'kalyanmncl15@gmail.com'), 'pro', 'active')",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 67
+}

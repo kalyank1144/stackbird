@@ -101,6 +101,8 @@ export default function Project() {
   const [repoName, setRepoName] = useState("");
   const [repoDescription, setRepoDescription] = useState("");
   const [isPrivate, setIsPrivate] = useState(false);
+  const [previewKey, setPreviewKey] = useState(0);
+  const iframeRef = useRef<HTMLIFrameElement>(null);
 
   const { data: project, isLoading: projectLoading } = trpc.projects.get.useQuery(
     { projectId },
@@ -108,6 +110,11 @@ export default function Project() {
   );
 
   const { data: files, refetch: refetchFiles } = trpc.files.list.useQuery(
+    { projectId },
+    { enabled: !!projectId }
+  );
+
+  const { data: previewUrl } = trpc.preview.getUrl.useQuery(
     { projectId },
     { enabled: !!projectId }
   );
@@ -183,12 +190,14 @@ export default function Project() {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, streamingData.content]);
 
-  // Refetch messages when streaming ends
+  // Refetch messages when streaming ends and refresh preview
   useEffect(() => {
     if (!streamingData.isStreaming && streamingData.conversationId === currentConversationId) {
       refetchMessages();
       refetchFiles();
       clearStreamingData();
+      // Refresh preview iframe
+      setPreviewKey(prev => prev + 1);
     }
   }, [streamingData.isStreaming, streamingData.conversationId, currentConversationId, refetchMessages, refetchFiles, clearStreamingData]);
 
@@ -381,8 +390,8 @@ export default function Project() {
               </TabsList>
             </div>
 
-            <TabsContent value="preview" className="flex-1 m-0 flex flex-col">
-              <ScrollArea className="flex-1 p-6">
+            <TabsContent value="preview" className="flex-1 m-0 flex flex-col overflow-hidden">
+              <div className="flex-1 overflow-y-auto p-6">
                 {!messages || messages.length === 0 ? (
                   <div className="max-w-2xl mx-auto text-center py-20">
                     <h2 className="text-3xl font-bold mb-2">Start Building</h2>
@@ -442,7 +451,7 @@ export default function Project() {
                     <div ref={messagesEndRef} />
                   </div>
                 )}
-              </ScrollArea>
+              </div>
 
               {/* Input Area */}
               <div className="border-t p-4 bg-card">
@@ -543,19 +552,43 @@ export default function Project() {
 
         {/* Right - Preview Pane */}
         <div className="w-96 border-l flex flex-col bg-muted/30">
-          <div className="border-b px-4 py-3 bg-card">
+          <div className="border-b px-4 py-3 bg-card flex items-center justify-between">
             <h3 className="text-sm font-semibold">Preview</h3>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setPreviewKey(prev => prev + 1)}
+              className="h-7 px-2"
+            >
+              <Eye className="h-3.5 w-3.5 mr-1.5" />
+              Refresh
+            </Button>
           </div>
-          <div className="flex-1 flex items-center justify-center p-8">
-            <div className="text-center space-y-3">
-              <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mx-auto">
-                <Eye className="h-8 w-8 text-muted-foreground" />
+          <div className="flex-1 relative bg-white">
+            {previewUrl && files && files.length > 0 ? (
+              <iframe
+                key={previewKey}
+                ref={iframeRef}
+                src={previewUrl.fullUrl}
+                className="w-full h-full border-0"
+                sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals"
+                title="Live Preview"
+              />
+            ) : (
+              <div className="flex items-center justify-center h-full p-8">
+                <div className="text-center space-y-3">
+                  <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mx-auto">
+                    <Eye className="h-8 w-8 text-muted-foreground" />
+                  </div>
+                  <p className="text-sm text-muted-foreground">Preview appears here</p>
+                  <p className="text-xs text-muted-foreground">
+                    {files && files.length === 0
+                      ? "Generate some code to see the live preview"
+                      : "Live preview of your application will be displayed here"}
+                  </p>
+                </div>
               </div>
-              <p className="text-sm text-muted-foreground">Preview appears here</p>
-              <p className="text-xs text-muted-foreground">
-                Live preview of your application will be displayed here
-              </p>
-            </div>
+            )}
           </div>
         </div>
       </div>

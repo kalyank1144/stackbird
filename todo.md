@@ -244,3 +244,22 @@
 - [x] Add GitHub button next to Deploy button in header
 - [x] Integrate existing GitHub dialog functionality
 - [ ] Test GitHub push workflow
+
+## Phase 31: Implement Live Preview Iframe
+- [x] Design preview server architecture
+- [x] Create backend endpoint to serve project files
+- [x] Add iframe to frontend preview pane
+- [x] Implement auto-refresh on file changes
+- [x] Handle HTML/CSS/JS projects
+- [x] Test with real projects
+
+## Phase 32: Fix Model API Keys and Upgrade Test User
+- [x] Check which models have working API keys
+- [x] Set default model to Claude 3.5 Haiku (has working key)
+- [x] Upgrade test user to Pro plan in database
+- [x] Test new project creation with working model
+
+## Phase 33: Fix Chat Scroll Issue
+- [x] Add proper scroll container to chat messages area
+- [x] Keep input field fixed at bottom
+- [x] Test scroll behavior with long conversations
