@@ -215,3 +215,16 @@
 - [x] Initialize git repo in each project workspace
 - [x] Add project files to aider context when starting
 - [ ] Test code generation works end-to-end
+
+## Phase 27: Fix Aider Git Repository Detection
+- [x] Diagnose why Aider uses parent repo instead of workspace repo
+- [x] Add GIT_CEILING_DIRECTORIES to prevent parent repo detection
+- [x] Manually initialize git in existing workspace
+- [x] Test that Aider uses correct git repo
+- [x] Verify file count is small (3 files, not 17,815 files)
+
+## Phase 28: Fix Aider Encoding Errors
+- [x] Investigate .aider* files causing encoding errors
+- [x] Filter hidden files from Aider context
+- [x] Add .aider* to .gitignore to prevent future issues
+- [x] Test Aider starts without encoding errors

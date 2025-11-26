@@ -77,6 +77,9 @@ export class AiderSession extends EventEmitter {
         PYTHONIOENCODING: "utf-8",
         LC_ALL: "C.UTF-8",
         LANG: "C.UTF-8",
+        // Prevent git from searching parent directories for .git
+        // This ensures Aider uses only the workspace's git repo
+        GIT_CEILING_DIRECTORIES: path.dirname(this.projectPath),
       };
       
       console.log(`[Aider] Environment: PYTHONHOME=${env.PYTHONHOME}`);

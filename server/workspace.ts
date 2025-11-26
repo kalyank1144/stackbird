@@ -68,7 +68,7 @@ export class WorkspaceManager {
       const gitignorePath = path.join(projectPath, ".gitignore");
       await fs.writeFile(
         gitignorePath,
-        `# Dependencies\nnode_modules/\n__pycache__/\n*.pyc\n\n# Environment\n.env\n.env.local\n\n# IDE\n.vscode/\n.idea/\n*.swp\n*.swo\n\n# OS\n.DS_Store\nThumbs.db\n`
+        `# Dependencies\nnode_modules/\n__pycache__/\n*.pyc\n\n# Environment\n.env\n.env.local\n\n# IDE\n.vscode/\n.idea/\n*.swp\n*.swo\n\n# Aider\n.aider*\n\n# OS\n.DS_Store\nThumbs.db\n`
       );
       
       // Make initial commit
@@ -123,6 +123,7 @@ export class WorkspaceManager {
 
   /**
    * List files in workspace
+   * Excludes hidden files (.git, .aider*, etc.) and system files
    */
   static async listFiles(projectId: number, dirPath: string = ""): Promise<string[]> {
     const projectPath = this.getProjectPath(projectId);
@@ -133,6 +134,11 @@ export class WorkspaceManager {
       const files: string[] = [];
       
       for (const entry of entries) {
+        // Skip hidden files and Aider cache
+        if (entry.name.startsWith('.')) {
+          continue;
+        }
+        
         const relativePath = path.join(dirPath, entry.name);
         if (entry.isDirectory()) {
           const subFiles = await this.listFiles(projectId, relativePath);
