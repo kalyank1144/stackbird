@@ -14,6 +14,8 @@ import { toast } from "sonner";
 import { APP_TITLE, getLoginUrl } from "@/const";
 import FileBrowser from "@/components/FileBrowser";
 import Terminal from "@/components/Terminal";
+import { ModelSelector } from "@/components/ModelSelector";
+import { getDefaultModel } from "@shared/models";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -55,6 +57,9 @@ export default function Project() {
   const [repoName, setRepoName] = useState("");
   const [repoDescription, setRepoDescription] = useState("");
   const [isPrivate, setIsPrivate] = useState(false);
+  const [selectedModelId, setSelectedModelId] = useState<string>(
+    getDefaultModel("pro").id // TODO: Use actual user plan
+  );
 
   const { data: project, isLoading: projectLoading } = trpc.projects.get.useQuery(
     { projectId },
@@ -187,6 +192,7 @@ export default function Project() {
       projectId,
       conversationId: currentConversationId,
       message: message.trim(),
+      modelId: selectedModelId,
     });
   };
 
@@ -405,7 +411,12 @@ export default function Project() {
               </ScrollArea>
 
               {/* Input */}
-              <div className="border-t p-4">
+              <div className="border-t p-4 space-y-3">
+                <ModelSelector
+                  selectedModelId={selectedModelId}
+                  onModelChange={setSelectedModelId}
+                  userPlan="pro"
+                />
                 <div className="flex gap-2">
                   <Input
                     placeholder="Ask AI to generate code..."
@@ -430,7 +441,7 @@ export default function Project() {
                     )}
                   </Button>
                 </div>
-                <p className="text-xs text-muted-foreground mt-2">
+                <p className="text-xs text-muted-foreground">
                   Press Enter to send, Shift+Enter for new line
                 </p>
               </div>

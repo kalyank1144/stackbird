@@ -142,7 +142,7 @@
 - [ ] Handle subscription created/updated/canceled events
 - [ ] Build pricing page UI with monthly/yearly toggle
 - [ ] Build subscription dashboard UI
-- [ ] Add model selector in chat interface
+- [x] Add model selector in chat interface
 - [ ] Add usage stats display (tokens used/remaining)
 - [ ] Add upgrade prompts when low on tokens
 - [ ] Test Stripe checkout flow

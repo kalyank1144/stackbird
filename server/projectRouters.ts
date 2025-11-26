@@ -176,10 +176,10 @@ export const chatRouter = router({
       }
 
       try {
-        // Create Aider session
+        // Create Aider session with selected model
         const aider = new AiderSession({
           projectPath,
-          model: "gpt-4o-mini",
+          model: model.id, // Use the selected model
           apiKey: ENV.forgeApiKey, // Use built-in API key
         });
 
