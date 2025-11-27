@@ -662,7 +662,7 @@ export default function Project() {
               <iframe
                 key={previewKey}
                 ref={iframeRef}
-                src={previewUrl.fullUrl}
+                src={`${previewUrl.fullUrl}?t=${previewKey}`}
                 className="w-full h-full border-0"
                 sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals"
                 title="Live Preview"
