@@ -494,3 +494,12 @@
 - [x] Show success/error states with icons
 - [x] Make banner dismissible but persistent across tabs
 - [x] Position banner prominently (top of chat or preview area)
+
+
+## Phase 65: Fix Error Message Truncation Bug
+- [x] Investigate why build error messages are being truncated (only "error during build:" sent to AI)
+- [x] Check buildManager error capture logic
+- [x] Ensure full error output is captured (both stdout and stderr)
+- [x] Verify error parser receives complete error text
+- [x] Test that AI receives full error details including file paths and line numbers
+- [ ] Test AI can fix tsconfig.node.json missing file error

@@ -41,8 +41,10 @@ export function parseBuildErrors(buildOutput: string): ErrorParseResult {
     // ESLint: /path/to/file.ts:45:10: error message (rule-name)
     eslint: /^(.+?):(\d+):(\d+):\s*(error|warning)\s+(.+?)\s*\((.+?)\)$/,
     
-    // Vite: [vite] error: message
+    // Vite: [vite] error: message OR error during build:
     vite: /^\[vite\]\s*(error|warning):\s*(.+)$/,
+    viteError: /^error during build:/i,
+    viteParsing: /^\[vite:([^\]]+)\]\s*parsing\s+(.+?)\s+failed:\s*(.+)$/,
     
     // Generic error with file:line:column
     generic: /^(.+?):(\d+):(\d+):\s*(error|warning):\s*(.+)$/,
@@ -52,6 +54,9 @@ export function parseBuildErrors(buildOutput: string): ErrorParseResult {
     
     // Syntax error: SyntaxError: Unexpected token
     syntaxError: /SyntaxError:\s*(.+)/,
+    
+    // File not found: ENOENT: no such file or directory
+    enoent: /ENOENT:\s*no such file or directory[,\s]+(.+)$/,
   };
   
   for (let i = 0; i < lines.length; i++) {
@@ -102,6 +107,40 @@ export function parseBuildErrors(buildOutput: string): ErrorParseResult {
       continue;
     }
     
+    // Try Vite parsing error format
+    match = line.match(patterns.viteParsing);
+    if (match) {
+      errors.push({
+        severity: 'error',
+        errorType: 'Vite',
+        message: `[${match[1]}] parsing ${match[2]} failed: ${match[3]}`,
+        context: extractContext(lines, i),
+      });
+      continue;
+    }
+    
+    // Try Vite "error during build" format
+    if (patterns.viteError.test(line)) {
+      // Look at next few lines for actual error details
+      const errorDetails: string[] = [line];
+      for (let j = i + 1; j < Math.min(i + 10, lines.length); j++) {
+        const nextLine = lines[j].trim();
+        if (nextLine && !nextLine.startsWith('>')) {
+          errorDetails.push(nextLine);
+        }
+        if (nextLine.includes('at file://') || nextLine.includes('Error:')) {
+          break;
+        }
+      }
+      errors.push({
+        severity: 'error',
+        errorType: 'Vite Build',
+        message: errorDetails.join('\n'),
+        context: extractContext(lines, i, 10),
+      });
+      continue;
+    }
+    
     // Try generic format
     match = line.match(patterns.generic);
     if (match) {
@@ -136,6 +175,18 @@ export function parseBuildErrors(buildOutput: string): ErrorParseResult {
         severity: 'error',
         errorType: 'Syntax',
         message: match[1],
+        context: extractContext(lines, i),
+      });
+      continue;
+    }
+    
+    // Try ENOENT (file not found) error
+    match = line.match(patterns.enoent);
+    if (match) {
+      errors.push({
+        severity: 'error',
+        errorType: 'File Not Found',
+        message: `File or directory not found: ${match[1]}`,
         context: extractContext(lines, i),
       });
       continue;
