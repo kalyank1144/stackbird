@@ -324,4 +324,10 @@
 - [x] Remove template selector from Dashboard create project dialog
 - [x] Set React App as default template for all new projects
 - [x] Test project creation with simplified UI
-- [ ] Deploy changes to production
+- [x] Deploy changes to production
+
+## Phase 44: Fix React Template Not Being Used
+- [x] Investigate why projects are using Flask instead of React template (wrong template ID: 'react' vs 'react-app')
+- [x] Fix template initialization in project creation backend (changed to 'react-app')
+- [x] Test that React template is properly applied (templates.test.ts passes)
+- [ ] Deploy fix to production

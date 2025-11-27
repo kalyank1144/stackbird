@@ -63,7 +63,7 @@ export default function Dashboard() {
     createProject.mutate({
       name: projectName,
       description: projectDescription || undefined,
-      templateId: 'react', // Default to React App template
+      templateId: 'react-app', // Default to React App template
     });
   };
 
