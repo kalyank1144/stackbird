@@ -237,6 +237,12 @@ export default function Project() {
       setPreviewKey(prev => prev + 1);
       const attemptMsg = buildStatus.attempt ? ` (attempt ${buildStatus.attempt}/${buildStatus.maxAttempts})` : "";
       toast.success(`Build completed${attemptMsg}! Preview updated.`);
+      
+      // Auto-switch to Preview tab if currently on Console tab
+      if (activeTab === "console") {
+        console.log("[Project] Auto-switching to Preview tab");
+        setActiveTab("preview");
+      }
     } else if (buildStatus.error && buildStatus.projectId === projectId) {
       // Build failed, show error
       const attemptMsg = buildStatus.attempt && buildStatus.maxAttempts 
@@ -244,7 +250,7 @@ export default function Project() {
         : "";
       toast.error(`Build failed${attemptMsg}: ${buildStatus.error}`);
     }
-  }, [buildStatus.isBuilding, buildStatus.projectId, buildStatus.error, buildStatus.attempt, buildStatus.maxAttempts, projectId]);
+  }, [buildStatus.isBuilding, buildStatus.projectId, buildStatus.error, buildStatus.attempt, buildStatus.maxAttempts, projectId, activeTab]);
 
   if (authLoading || projectLoading) {
     return (

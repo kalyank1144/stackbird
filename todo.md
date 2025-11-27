@@ -427,3 +427,9 @@
 - [ ] Replace quick toast with persistent banner during fixes
 - [ ] Add visual feedback for each retry phase (analyzing, fixing, building)
 - [ ] Keep banner visible until final result (success or max retries)
+
+## Phase 58: Auto-Switch to Preview Tab After Build
+- [x] Auto-switch from Console to Preview tab when build succeeds
+- [x] Only switch if user is on Console tab (don't interrupt if on Code tab)
+- [ ] Add smooth transition animation
+- [ ] Test: Verify tab switches automatically after successful build
