@@ -454,3 +454,24 @@
 - [x] Use iframe.contentWindow.location.reload(true) for hard reload
 - [x] Bypass all browser cache layers (service worker, disk cache, memory cache)
 - [ ] Test: Verify preview loads fresh HTML after each build
+
+
+## PENDING ISSUES (To be fixed later)
+
+### Preview Loading Issue (React Apps)
+**Status:** PENDING - Needs deeper investigation
+**Problem:** Preview iframe not loading React apps after build, showing MIME type errors
+**Root Cause:** Browser caching stale index.html with old asset hashes, even with:
+- Cache-control headers ✅
+- Query parameter cache busting ✅
+- Iframe src manipulation ✅
+- Hard reload via contentWindow.location.reload() ✅
+
+**Possible Solutions to Try:**
+1. Use a reverse proxy to add stronger cache headers
+2. Serve preview from a different subdomain for each build
+3. Investigate if there's a service worker interfering
+4. Use a different preview mechanism (not iframe)
+5. Add meta tags to index.html via post-build script
+
+**Workaround:** Users can manually refresh the preview (Ctrl+F5) or click the Refresh button
