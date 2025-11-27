@@ -37,12 +37,10 @@ export class AiderSession extends EventEmitter {
    */
   async start(addFiles?: string[]): Promise<void> {
     return new Promise((resolve, reject) => {
-      // Use python -m aider as recommended by official docs
-      // https://aider.chat/docs/troubleshooting/aider-not-found.html
-      const pythonPath = "/usr/bin/python3.11";
-      
+      // Use aider command directly
+      const aiderCommand = "/opt/homebrew/bin/aider";
+
       const args = [
-        "-m", "aider",
         "--model", this.model,
         "--no-auto-commits",
         "--yes-always",
@@ -56,23 +54,20 @@ export class AiderSession extends EventEmitter {
         }
       }
       
-      console.log(`[Aider] Starting with command: ${pythonPath} ${args.join(" ")}`);
-      console.log(`[Aider] Python version check...`);
-      // Test Python can start
+      console.log(`[Aider] Starting with command: ${aiderCommand} ${args.join(" ")}`);
+      console.log(`[Aider] Aider version check...`);
+      // Test Aider can start
       try {
-        const pythonVersion = execSync(`${pythonPath} --version 2>&1`).toString().trim();
-        console.log(`[Aider] ${pythonVersion}`);
+        const aiderVersion = execSync(`${aiderCommand} --version 2>&1`).toString().trim();
+        console.log(`[Aider] ${aiderVersion}`);
       } catch (e) {
-        console.error(`[Aider] Failed to check Python version:`, e);
+        console.error(`[Aider] Failed to check Aider version:`, e);
       }
       console.log(`[Aider] Working directory: ${this.projectPath}`);
       console.log(`[Aider] Model: ${this.model}`);
 
-      const env: Record<string, string> = { 
+      const env: Record<string, string> = {
         ...process.env as Record<string, string>,
-        // Set Python environment to prevent "No module named 'encodings'" error
-        PYTHONHOME: "/usr",
-        PYTHONPATH: "/usr/lib/python311.zip:/usr/lib/python3.11:/usr/lib/python3.11/lib-dynload:/usr/local/lib/python3.11/dist-packages:/usr/lib/python3/dist-packages",
         // Ensure UTF-8 encoding
         PYTHONIOENCODING: "utf-8",
         LC_ALL: "C.UTF-8",
@@ -102,7 +97,7 @@ export class AiderSession extends EventEmitter {
         }
       }
 
-      this.process = spawn(pythonPath, args, {
+      this.process = spawn(aiderCommand, args, {
         cwd: this.projectPath,
         env,
         stdio: ["pipe", "pipe", "pipe"],

@@ -145,12 +145,31 @@ export class BuildManager {
           }
         });
 
-        proc.on("close", (code) => {
+        proc.on("close", async (code) => {
           this.buildingProjects.delete(projectId);
-          
+
           if (code === 0) {
             console.log(`[Build] Build completed for project ${projectId}`);
-            resolve({ success: true, output });
+
+            // Verify dist folder exists and has content before resolving
+            const distPath = path.join(projectPath, "dist");
+            try {
+              await fs.access(distPath);
+              const distFiles = await fs.readdir(distPath);
+
+              if (distFiles.length > 0) {
+                console.log(`[Build] Dist folder verified with ${distFiles.length} files`);
+                // Small delay to ensure file system flush completes
+                await new Promise((r) => setTimeout(r, 500));
+                resolve({ success: true, output });
+              } else {
+                console.warn(`[Build] Dist folder is empty for project ${projectId}`);
+                resolve({ success: true, output });
+              }
+            } catch (err) {
+              console.log(`[Build] No dist folder found, build may not produce dist (project ${projectId})`);
+              resolve({ success: true, output });
+            }
           } else {
             console.error(`[Build] Build failed for project ${projectId}:`, error);
             resolve({ success: false, output, error });

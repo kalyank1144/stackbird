@@ -127,20 +127,27 @@ export default function Project() {
   useEffect(() => {
     if (iframeRef.current && previewUrl) {
       const iframe = iframeRef.current;
-      
-      // First load: set src directly
-      if (!iframe.src || iframe.src === 'about:blank') {
-        iframe.src = `${previewUrl.fullUrl}?t=${Date.now()}`;
-      } else {
-        // Subsequent loads: use hard reload to bypass all cache layers
-        try {
-          // This forces a complete reload, bypassing cache (like Ctrl+F5)
-          iframe.contentWindow?.location.reload();
-        } catch (e) {
-          // Fallback if contentWindow is not accessible (cross-origin)
-          iframe.src = `${previewUrl.fullUrl}?t=${Date.now()}`;
+
+      // Add delay to ensure dist files are fully written after build
+      const delayedReload = setTimeout(() => {
+        // First load: set src directly
+        if (!iframe.src || iframe.src === 'about:blank') {
+          iframe.src = `${previewUrl.fullUrl}?t=${Date.now()}&r=${Math.random()}`;
+        } else {
+          // Subsequent loads: use hard reload to bypass all cache layers
+          try {
+            // Aggressive cache busting with timestamp + random ID
+            const cacheBuster = `?t=${Date.now()}&r=${Math.random()}`;
+            const newUrl = previewUrl.fullUrl.split('?')[0] + cacheBuster;
+            iframe.src = newUrl;
+          } catch (e) {
+            // Fallback if there's any error
+            iframe.src = `${previewUrl.fullUrl}?t=${Date.now()}&r=${Math.random()}`;
+          }
         }
-      }
+      }, 800); // Wait 800ms to ensure file system has flushed all changes
+
+      return () => clearTimeout(delayedReload);
     }
   }, [previewKey, previewUrl]);
 
@@ -255,19 +262,23 @@ export default function Project() {
     if (!buildStatus.isBuilding && buildStatus.projectId === projectId && !buildStatus.error) {
       // Build completed successfully, refresh preview
       console.log("[Project] Build succeeded, refreshing preview");
-      setPreviewKey(prev => prev + 1);
       const attemptMsg = buildStatus.attempt ? ` (attempt ${buildStatus.attempt}/${buildStatus.maxAttempts})` : "";
-      toast.success(`Build completed${attemptMsg}! Preview updated.`);
-      
-      // Auto-switch to Preview tab if currently on Console tab
+      toast.success(`Build completed${attemptMsg}! Updating preview...`);
+
+      // Trigger preview refresh (iframe will reload with delay to ensure files are ready)
+      setPreviewKey(prev => prev + 1);
+
+      // Auto-switch to Preview tab after a brief moment to show completion
       if (activeTab === "console") {
-        console.log("[Project] Auto-switching to Preview tab");
-        setActiveTab("preview");
+        setTimeout(() => {
+          console.log("[Project] Auto-switching to Preview tab");
+          setActiveTab("preview");
+        }, 1000);
       }
     } else if (buildStatus.error && buildStatus.projectId === projectId) {
       // Build failed, show error
-      const attemptMsg = buildStatus.attempt && buildStatus.maxAttempts 
-        ? ` (attempt ${buildStatus.attempt}/${buildStatus.maxAttempts})` 
+      const attemptMsg = buildStatus.attempt && buildStatus.maxAttempts
+        ? ` (attempt ${buildStatus.attempt}/${buildStatus.maxAttempts})`
         : "";
       toast.error(`Build failed${attemptMsg}: ${buildStatus.error}`);
     }
