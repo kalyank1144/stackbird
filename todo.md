@@ -475,3 +475,22 @@
 5. Add meta tags to index.html via post-build script
 
 **Workaround:** Users can manually refresh the preview (Ctrl+F5) or click the Refresh button
+
+
+## Phase 63: Better Error Messages to AI
+- [x] Parse build output to extract specific errors (file, line, message)
+- [x] Extract TypeScript/ESLint errors with file paths and line numbers
+- [x] Extract Vite build errors with context
+- [x] Format errors in structured way for AI to understand
+- [x] Send detailed error context to Aider instead of generic "Build failed"
+- [x] Include relevant file content around error location
+
+## Phase 64: Stunning Persistent Retry Status Banner
+- [x] Design modern, animated banner component
+- [x] Show current AI activity: "Analyzing errors...", "Fixing code...", "Building..."
+- [x] Add progress indicator (attempt 1/3, 2/3, 3/3)
+- [x] Use smooth animations and transitions
+- [x] Add pulsing/shimmer effects for "working" state
+- [x] Show success/error states with icons
+- [x] Make banner dismissible but persistent across tabs
+- [x] Position banner prominently (top of chat or preview area)

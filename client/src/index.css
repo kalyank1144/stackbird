@@ -133,6 +133,18 @@
   }
 }
 
+@layer utilities {
+  @keyframes shimmer {
+    100% {
+      transform: translateX(100%);
+    }
+  }
+  
+  .animate-shimmer {
+    animation: shimmer 2s infinite;
+  }
+}
+
 @layer components {
   /**
    * Custom container utility that centers content and adds responsive padding.

@@ -13,6 +13,7 @@ import { Link, useParams } from "wouter";
 import { toast } from "sonner";
 import { APP_TITLE, getLoginUrl } from "@/const";
 import { ModelSelector } from "@/components/ModelSelector";
+import { RetryStatusBanner, type RetryStatus } from "@/components/RetryStatusBanner";
 import { getDefaultModel } from "@shared/models";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
@@ -107,6 +108,7 @@ export default function Project() {
   const [isPrivate, setIsPrivate] = useState(false);
   const [previewKey, setPreviewKey] = useState(0);
   const iframeRef = useRef<HTMLIFrameElement>(null);
+  const [retryStatus, setRetryStatus] = useState<RetryStatus>({ type: "idle" });
 
   const { data: project, isLoading: projectLoading } = trpc.projects.get.useQuery(
     { projectId },
@@ -250,28 +252,61 @@ export default function Project() {
     }
   }, [streamingData.isStreaming, streamingData.conversationId, currentConversationId, refetchMessages, refetchFiles, clearStreamingData]);
 
-  // Auto-refresh preview when build succeeds
+  // Update retry status banner based on build status
   useEffect(() => {
-    if (!buildStatus.isBuilding && buildStatus.projectId === projectId && !buildStatus.error) {
-      // Build completed successfully, refresh preview
-      console.log("[Project] Build succeeded, refreshing preview");
-      setPreviewKey(prev => prev + 1);
-      const attemptMsg = buildStatus.attempt ? ` (attempt ${buildStatus.attempt}/${buildStatus.maxAttempts})` : "";
-      toast.success(`Build completed${attemptMsg}! Preview updated.`);
+    if (buildStatus.projectId !== projectId) return;
+    
+    if (buildStatus.isBuilding) {
+      // Building state
+      setRetryStatus({
+        type: "building",
+        attempt: buildStatus.attempt || 1,
+        maxAttempts: buildStatus.maxAttempts || 3,
+      });
+    } else if (!buildStatus.error && buildStatus.attempt) {
+      // Build succeeded
+      setRetryStatus({
+        type: "success",
+        attempt: buildStatus.attempt,
+      });
       
       // Auto-switch to Preview tab if currently on Console tab
       if (activeTab === "console") {
         console.log("[Project] Auto-switching to Preview tab");
         setActiveTab("preview");
       }
-    } else if (buildStatus.error && buildStatus.projectId === projectId) {
-      // Build failed, show error
-      const attemptMsg = buildStatus.attempt && buildStatus.maxAttempts 
-        ? ` (attempt ${buildStatus.attempt}/${buildStatus.maxAttempts})` 
-        : "";
-      toast.error(`Build failed${attemptMsg}: ${buildStatus.error}`);
+      
+      // Refresh preview
+      console.log("[Project] Build succeeded, refreshing preview");
+      setPreviewKey(prev => prev + 1);
+    } else if (buildStatus.error && buildStatus.attempt && buildStatus.maxAttempts) {
+      // Build failed
+      if (buildStatus.attempt >= buildStatus.maxAttempts) {
+        // All attempts exhausted
+        setRetryStatus({
+          type: "failed",
+          attempt: buildStatus.attempt,
+          maxAttempts: buildStatus.maxAttempts,
+        });
+      } else {
+        // More attempts remaining - AI is analyzing/fixing
+        setRetryStatus({
+          type: "analyzing",
+          attempt: buildStatus.attempt + 1,
+          maxAttempts: buildStatus.maxAttempts,
+        });
+      }
     }
-  }, [buildStatus.isBuilding, buildStatus.projectId, buildStatus.error, buildStatus.attempt, buildStatus.maxAttempts, projectId, activeTab]);
+  }, [buildStatus, projectId, activeTab]);
+  
+  // Update retry status when AI is streaming (fixing code)
+  useEffect(() => {
+    if (streamingData.isStreaming && retryStatus.type === "analyzing") {
+      setRetryStatus(prev => 
+        prev.type === "analyzing" ? { ...prev, type: "fixing" } : prev
+      );
+    }
+  }, [streamingData.isStreaming, retryStatus.type]);
 
   if (authLoading || projectLoading) {
     return (
@@ -533,6 +568,13 @@ export default function Project() {
               {/* Input Area */}
               <div className="border-t p-4 bg-card">
                 <div className="max-w-3xl mx-auto space-y-3">
+                  {/* Retry Status Banner */}
+                  {retryStatus.type !== "idle" && (
+                    <RetryStatusBanner 
+                      status={retryStatus} 
+                      onDismiss={() => setRetryStatus({ type: "idle" })}
+                    />
+                  )}
                   <div className="flex gap-3">
                     <Input
                       placeholder="Describe what you want..."
