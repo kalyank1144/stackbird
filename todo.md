@@ -414,3 +414,16 @@
 - [x] Show visual indicator when preview is refreshing
 - [x] Ensure preview updates even during retry attempts
 - [ ] Test: Verify preview refreshes after each successful build
+
+## Phase 56: Fix Build Status Indicator After Retry
+- [x] Clear "Build failed" indicator when retry succeeds
+- [x] Update preview pane status from "Build failed" to "Success"
+- [x] Remove error message from preview when build succeeds
+- [ ] Test: Verify status updates correctly after retry
+
+## Phase 57: Add Persistent Retry Status Banner (Future Enhancement)
+- [ ] Add status banner showing "AI is fixing build errors... (attempt X/3)"
+- [ ] Show progress indicator during retry process
+- [ ] Replace quick toast with persistent banner during fixes
+- [ ] Add visual feedback for each retry phase (analyzing, fixing, building)
+- [ ] Keep banner visible until final result (success or max retries)

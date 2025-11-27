@@ -627,12 +627,17 @@ export default function Project() {
               {buildStatus.isBuilding && buildStatus.projectId === projectId && (
                 <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
                   <Loader2 className="h-3 w-3 animate-spin" />
-                  Building...
+                  Building{buildStatus.attempt ? ` (${buildStatus.attempt}/${buildStatus.maxAttempts})` : ''}...
                 </div>
               )}
-              {buildStatus.error && buildStatus.projectId === projectId && (
+              {!buildStatus.isBuilding && buildStatus.projectId === projectId && buildStatus.error && (
                 <div className="text-xs text-destructive">
                   Build failed
+                </div>
+              )}
+              {!buildStatus.isBuilding && buildStatus.projectId === projectId && !buildStatus.error && buildStatus.attempt && (
+                <div className="text-xs text-green-600">
+                  ✓ Build successful
                 </div>
               )}
             </div>
