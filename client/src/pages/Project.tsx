@@ -123,16 +123,24 @@ export default function Project() {
     { enabled: !!projectId }
   );
   
-  // Force iframe to reload when preview key changes
+  // Force iframe to do a hard reload when preview key changes (bypasses all cache)
   useEffect(() => {
     if (iframeRef.current && previewUrl) {
-      // Force reload by setting src to empty then back to the URL
       const iframe = iframeRef.current;
-      const newSrc = `${previewUrl.fullUrl}?t=${Date.now()}`;
-      iframe.src = 'about:blank';
-      setTimeout(() => {
-        iframe.src = newSrc;
-      }, 10);
+      
+      // First load: set src directly
+      if (!iframe.src || iframe.src === 'about:blank') {
+        iframe.src = `${previewUrl.fullUrl}?t=${Date.now()}`;
+      } else {
+        // Subsequent loads: use hard reload to bypass all cache layers
+        try {
+          // This forces a complete reload, bypassing cache (like Ctrl+F5)
+          iframe.contentWindow?.location.reload();
+        } catch (e) {
+          // Fallback if contentWindow is not accessible (cross-origin)
+          iframe.src = `${previewUrl.fullUrl}?t=${Date.now()}`;
+        }
+      }
     }
   }, [previewKey, previewUrl]);
 

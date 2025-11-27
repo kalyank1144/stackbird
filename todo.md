@@ -449,3 +449,8 @@
 - [x] Only return index.html for navigation requests (not .js/.css files)
 - [x] Return proper 404 for missing asset files
 - [ ] Test: Verify JavaScript files load with correct MIME type
+
+## Phase 62: Implement Iframe Hard Reload (FINAL FIX)
+- [x] Use iframe.contentWindow.location.reload(true) for hard reload
+- [x] Bypass all browser cache layers (service worker, disk cache, memory cache)
+- [ ] Test: Verify preview loads fresh HTML after each build
