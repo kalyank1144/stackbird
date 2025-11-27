@@ -318,4 +318,10 @@
 ## Phase 42: Fix Invalid URL Error in Production
 - [x] Investigate Invalid URL error in frontend asset loading (getLoginUrl with undefined OAuth URL)
 - [x] Fix asset path or base URL configuration (added fallback for missing OAuth config)
-- [ ] Deploy fix and verify production site works
+- [x] Deploy fix and verify production site works
+
+## Phase 43: Simplify Project Creation UI
+- [x] Remove template selector from Dashboard create project dialog
+- [x] Set React App as default template for all new projects
+- [x] Test project creation with simplified UI
+- [ ] Deploy changes to production
