@@ -503,3 +503,14 @@
 - [x] Verify error parser receives complete error text
 - [x] Test that AI receives full error details including file paths and line numbers
 - [ ] Test AI can fix tsconfig.node.json missing file error
+
+
+## Phase 66: AI Workshop Preview Visualization
+- [x] Create BuildingPreview component with cute robot character
+- [x] Add floating code snippet animations
+- [x] Implement step-by-step progress checklist (Reading errors, Analyzing code, Writing fix, Building)
+- [x] Add smooth animations and transitions
+- [x] Integrate with Project.tsx preview pane
+- [x] Show BuildingPreview when build is in progress
+- [x] Hide BuildingPreview and show iframe when build succeeds
+- [ ] Test with real build/retry cycle

@@ -14,6 +14,7 @@ import { toast } from "sonner";
 import { APP_TITLE, getLoginUrl } from "@/const";
 import { ModelSelector } from "@/components/ModelSelector";
 import { RetryStatusBanner, type RetryStatus } from "@/components/RetryStatusBanner";
+import { BuildingPreview } from "@/components/BuildingPreview";
 import { getDefaultModel } from "@shared/models";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
@@ -721,7 +722,14 @@ export default function Project() {
             </Button>
           </div>
           <div className="flex-1 relative bg-white">
-            {previewUrl && files && files.length > 0 ? (
+            {/* Show BuildingPreview when build is in progress */}
+            {buildStatus.isBuilding && buildStatus.projectId === projectId && retryStatus.type !== "idle" ? (
+              <BuildingPreview 
+                attempt={buildStatus.attempt || 1}
+                maxAttempts={buildStatus.maxAttempts || 3}
+                status={retryStatus.type === "analyzing" ? "analyzing" : retryStatus.type === "fixing" ? "fixing" : "building"}
+              />
+            ) : previewUrl && files && files.length > 0 ? (
               <iframe
                 key={previewKey}
                 ref={iframeRef}
