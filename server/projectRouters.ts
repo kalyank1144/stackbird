@@ -6,7 +6,7 @@ import { AiderSession } from "./aider";
 import { WorkspaceManager } from "./workspace";
 import { BuildManager } from "./buildManager";
 import { getTemplateById, getAllTemplates } from "./templates";
-import { emitToUser } from "./_core/socket";
+import { emitToUser, getUserSocketEmitter } from "./_core/socket";
 import { executeCode } from "./executor";
 import { GitHubIntegration } from "./github";
 import { hasEnoughCredits, deductCredits, getUserCredits, PLANS, canCreateProject } from "./subscription";
@@ -270,7 +270,8 @@ export const chatRouter = router({
               });
               
               // Run build in background
-              BuildManager.installAndBuild(input.projectId)
+              const userSocket = getUserSocketEmitter(ctx.user.id);
+              BuildManager.installAndBuild(input.projectId, { socket: userSocket })
                 .then((buildResult) => {
                   if (buildResult.success) {
                     console.log("[Chat] Build completed successfully");

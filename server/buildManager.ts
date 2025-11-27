@@ -9,6 +9,10 @@ export interface BuildResult {
   error?: string;
 }
 
+export interface BuildOptions {
+  socket?: any; // Socket.IO instance for streaming output
+}
+
 /**
  * Manages building of project workspaces
  */
@@ -55,7 +59,7 @@ export class BuildManager {
   /**
    * Run npm install in project directory
    */
-  static async install(projectId: number): Promise<BuildResult> {
+  static async install(projectId: number, options?: BuildOptions): Promise<BuildResult> {
     const projectPath = WorkspaceManager.getProjectPath(projectId);
     
     return new Promise((resolve) => {
@@ -68,11 +72,19 @@ export class BuildManager {
       });
 
       proc.stdout.on("data", (data) => {
-        output += data.toString();
+        const text = data.toString();
+        output += text;
+        if (options?.socket) {
+          options.socket.emit("build:output", { projectId, output: text });
+        }
       });
 
       proc.stderr.on("data", (data) => {
-        error += data.toString();
+        const text = data.toString();
+        error += text;
+        if (options?.socket) {
+          options.socket.emit("build:output", { projectId, output: text });
+        }
       });
 
       proc.on("close", (code) => {
@@ -95,7 +107,7 @@ export class BuildManager {
   /**
    * Run npm run build in project directory
    */
-  static async build(projectId: number): Promise<BuildResult> {
+  static async build(projectId: number, options?: BuildOptions): Promise<BuildResult> {
     if (this.buildingProjects.has(projectId)) {
       return {
         success: false,
@@ -118,11 +130,19 @@ export class BuildManager {
         });
 
         proc.stdout.on("data", (data) => {
-          output += data.toString();
+          const text = data.toString();
+          output += text;
+          if (options?.socket) {
+            options.socket.emit("build:output", { projectId, output: text });
+          }
         });
 
         proc.stderr.on("data", (data) => {
-          error += data.toString();
+          const text = data.toString();
+          error += text;
+          if (options?.socket) {
+            options.socket.emit("build:output", { projectId, output: text });
+          }
         });
 
         proc.on("close", (code) => {
@@ -156,7 +176,7 @@ export class BuildManager {
   /**
    * Install dependencies and build project
    */
-  static async installAndBuild(projectId: number): Promise<BuildResult> {
+  static async installAndBuild(projectId: number, options?: BuildOptions): Promise<BuildResult> {
     console.log(`[Build] Starting install and build for project ${projectId}`);
 
     // Check if it's a Node.js project
@@ -173,13 +193,13 @@ export class BuildManager {
     const hasModules = await this.hasNodeModules(projectId);
     if (!hasModules) {
       console.log(`[Build] Installing dependencies for project ${projectId}`);
-      const installResult = await this.install(projectId);
+      const installResult = await this.install(projectId, options);
       if (!installResult.success) {
         return installResult;
       }
     }
 
     // Build the project
-    return await this.build(projectId);
+    return await this.build(projectId, options);
   }
 }

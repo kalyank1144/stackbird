@@ -37,6 +37,8 @@ export function useSocket() {
     error: null,
   });
 
+  const [buildLogs, setBuildLogs] = useState<Array<{ projectId: number; log: string }>>([]); 
+
   useEffect(() => {
     // Connect to Socket.io server
     const socket = io({
@@ -106,6 +108,11 @@ export function useSocket() {
         isBuilding: true,
         error: null,
       });
+      // Clear previous logs for this project
+      setBuildLogs(prev => prev.filter(l => l.projectId !== data.projectId));
+      if (data.output) {
+        setBuildLogs(prev => [...prev, { projectId: data.projectId, log: data.output! }]);
+      }
     });
 
     socket.on("build:success", (data: BuildMessage) => {
@@ -115,6 +122,9 @@ export function useSocket() {
         isBuilding: false,
         error: null,
       });
+      if (data.output) {
+        setBuildLogs(prev => [...prev, { projectId: data.projectId, log: data.output! }]);
+      }
     });
 
     socket.on("build:error", (data: BuildMessage) => {
@@ -124,6 +134,15 @@ export function useSocket() {
         isBuilding: false,
         error: data.error || "Build failed",
       });
+      if (data.error) {
+        setBuildLogs(prev => [...prev, { projectId: data.projectId, log: `ERROR: ${data.error}` }]);
+      }
+    });
+
+    // Listen for build output streaming
+    socket.on("build:output", (data: BuildMessage & { output: string }) => {
+      console.log("[Socket] Build output:", data.output);
+      setBuildLogs(prev => [...prev, { projectId: data.projectId, log: data.output }]);
     });
 
     return () => {
@@ -136,6 +155,7 @@ export function useSocket() {
     isConnected,
     streamingData,
     buildStatus,
+    buildLogs,
     clearStreamingData: () => setStreamingData({
       conversationId: null,
       content: "",

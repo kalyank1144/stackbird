@@ -364,3 +364,11 @@
 - [x] Add build status indicator in UI
 - [ ] Test auto-build with React todo app
 - [ ] Deploy auto-build feature to production
+
+## Phase 50: Add Console/Build Logs Tab
+- [x] Add Console tab to Project page UI (alongside Preview and Code)
+- [x] Update useSocket to capture build output logs
+- [x] Stream build logs via WebSocket to Console tab
+- [x] Display build errors clearly in Console
+- [x] Add auto-scroll to Console for latest logs
+- [ ] Test Console tab with build errors

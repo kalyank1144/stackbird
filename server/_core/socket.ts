@@ -82,6 +82,19 @@ export function emitToUser(userId: number, event: string, data: any) {
   io.to(`user:${userId}`).emit(event, data);
 }
 
+// Helper to get a socket emitter for a specific user
+export function getUserSocketEmitter(userId: number) {
+  if (!io) {
+    console.warn("[Socket.io] Cannot get emitter: Socket.io not initialized");
+    return null;
+  }
+  return {
+    emit: (event: string, data: any) => {
+      io!.to(`user:${userId}`).emit(event, data);
+    },
+  };
+}
+
 // Helper to emit to a specific project room
 export function emitToProject(projectId: number, event: string, data: any) {
   if (!io) {

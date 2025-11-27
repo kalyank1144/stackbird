@@ -6,7 +6,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { trpc } from "@/lib/trpc";
 import Editor from "@monaco-editor/react";
-import { ArrowLeft, Loader2, FileText, Sparkles, Eye, Code2, FolderOpen, ChevronRight, ChevronDown, Upload, Github } from "lucide-react";
+import { ArrowLeft, Loader2, FileText, Sparkles, Eye, Code2, FolderOpen, ChevronRight, ChevronDown, Upload, Github, Terminal } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { useSocket } from "@/hooks/useSocket";
 import { Link, useParams } from "wouter";
@@ -87,7 +87,7 @@ export default function Project() {
   const { user, loading: authLoading } = useAuth();
   const [message, setMessage] = useState("");
   const [currentConversationId, setCurrentConversationId] = useState<number | undefined>();
-  const { isConnected, streamingData, buildStatus, clearStreamingData } = useSocket();
+  const { isConnected, streamingData, buildStatus, buildLogs: allBuildLogs, clearStreamingData } = useSocket();
   const [selectedFile, setSelectedFile] = useState<{ path: string; content: string } | null>(null);
   const [editorContent, setEditorContent] = useState("");
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
@@ -96,7 +96,11 @@ export default function Project() {
   const [selectedModelId, setSelectedModelId] = useState<string>(
     getDefaultModel("pro").id
   );
-  const [activeTab, setActiveTab] = useState<"preview" | "code">("preview");
+  const [activeTab, setActiveTab] = useState<"preview" | "code" | "console">("preview");
+  const consoleEndRef = useRef<HTMLDivElement>(null);
+  
+  // Filter build logs for current project
+  const buildLogs = allBuildLogs.filter(log => log.projectId === projectId).map(log => log.log);
   const [githubDialogOpen, setGithubDialogOpen] = useState(false);
   const [repoName, setRepoName] = useState("");
   const [repoDescription, setRepoDescription] = useState("");
@@ -189,6 +193,13 @@ export default function Project() {
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, streamingData.content]);
+
+  // Auto-scroll console when new build logs arrive
+  useEffect(() => {
+    if (activeTab === "console") {
+      consoleEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [buildLogs, activeTab]);
 
   // Refetch messages when streaming ends and refresh preview
   useEffect(() => {
@@ -403,6 +414,11 @@ export default function Project() {
                   Code
                   {hasUnsavedChanges && <div className="h-2 w-2 rounded-full bg-orange-500" />}
                 </TabsTrigger>
+                <TabsTrigger value="console" className="gap-2">
+                  <Terminal className="h-4 w-4" />
+                  Console
+                  {buildStatus.error && <div className="h-2 w-2 rounded-full bg-red-500" />}
+                </TabsTrigger>
               </TabsList>
             </div>
 
@@ -561,6 +577,25 @@ export default function Project() {
                     </div>
                   </div>
                 )}
+              </div>
+            </TabsContent>
+
+            <TabsContent value="console" className="flex-1 m-0 flex flex-col overflow-hidden">
+              <div className="flex-1 overflow-hidden flex flex-col">
+                <ScrollArea className="flex-1 p-4 bg-black text-green-400 font-mono text-sm">
+                  {buildLogs.length === 0 ? (
+                    <div className="text-gray-500">No build logs yet. Build logs will appear here when AI generates code.</div>
+                  ) : (
+                    <div className="space-y-1">
+                      {buildLogs.map((log, index) => (
+                        <div key={index} className="whitespace-pre-wrap break-words">
+                          {log}
+                        </div>
+                      ))}
+                      <div ref={consoleEndRef} />
+                    </div>
+                  )}
+                </ScrollArea>
               </div>
             </TabsContent>
           </Tabs>
