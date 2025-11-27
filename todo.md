@@ -372,3 +372,30 @@
 - [x] Display build errors clearly in Console
 - [x] Add auto-scroll to Console for latest logs
 - [ ] Test Console tab with build errors
+
+## Phase 51: P0 Critical Fixes - Context Persistence
+- [x] Load conversation history from database when project opens
+- [x] Pass conversation context to Aider session
+- [x] Optimize context loading (limit to last 50 messages)
+- [x] Add database index on conversationId column
+- [ ] Test: Open existing project, verify AI remembers context
+- [ ] Test: Send follow-up message, verify continuity
+
+## Phase 52: P0 Critical Fixes - Auto Build Error Detection
+- [x] Keep Aider session alive during build process
+- [x] Stream build output to AI in real-time
+- [x] Detect build failures automatically
+- [x] Send build errors to AI for analysis
+- [x] Implement retry logic (max 3 attempts)
+- [x] Show build status in chat UI
+- [ ] Test: Create app with intentional error, verify AI fixes it
+- [ ] Test: Verify auto-retry works correctly
+
+## Phase 53: P0 Critical Fixes - Basic App Validation
+- [ ] Test 1: Todo app (add/delete functionality)
+- [ ] Test 2: Counter app (increment/decrement)
+- [ ] Test 3: Calculator app (basic operations)
+- [ ] Test 4: Weather app (display mock data)
+- [ ] Test 5: Contact form (with validation)
+- [ ] Document test results and success rate
+- [ ] Create checkpoint after all tests pass
