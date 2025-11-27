@@ -313,4 +313,9 @@
 ## Phase 41: Fix Railway Port Configuration
 - [x] Check server port configuration in index.ts
 - [x] Update server to use PORT environment variable from Railway
-- [ ] Deploy fix and update Railway domain to port 8080
+- [x] Deploy fix and update Railway domain to port 8080
+
+## Phase 42: Fix Invalid URL Error in Production
+- [x] Investigate Invalid URL error in frontend asset loading (getLoginUrl with undefined OAuth URL)
+- [x] Fix asset path or base URL configuration (added fallback for missing OAuth config)
+- [ ] Deploy fix and verify production site works
