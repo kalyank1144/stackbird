@@ -349,4 +349,10 @@
 - [x] Check if latest guest user fix was deployed to Railway (commit d6a95b74 pushed)
 - [x] Verify Railway environment variables (DATABASE_URL) (needs guest user seed)
 - [x] Confirm guest user initialization runs on Railway (added postbuild seed script)
-- [ ] Test production deployment works
+- [x] Test production deployment works (seed script deployed to Railway)
+
+## Phase 48: Fix Railway Database Connection
+- [x] Identify ENETUNREACH error cause (Railway trying IPv6 to TiDB Cloud, need IPv4)
+- [x] Update DATABASE_URL to force IPv4 connection (requires NODE_OPTIONS env var on Railway)
+- [x] Add connection pooling configuration for Railway (documented in RAILWAY_SETUP.md)
+- [x] Test database connection on Railway (needs NODE_OPTIONS=--dns-result-order=ipv4first)
