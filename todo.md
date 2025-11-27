@@ -356,3 +356,122 @@
 - [x] Update DATABASE_URL to force IPv4 connection (requires NODE_OPTIONS env var on Railway)
 - [x] Add connection pooling configuration for Railway (documented in RAILWAY_SETUP.md)
 - [x] Test database connection on Railway (needs NODE_OPTIONS=--dns-result-order=ipv4first)
+
+## Phase 49: Implement Auto-Build for Live Preview
+- [x] Create build manager module to run npm install and build
+- [x] Update preview server to serve from dist/ folder
+- [x] Trigger auto-build after Aider finishes generating code
+- [x] Add build status indicator in UI
+- [ ] Test auto-build with React todo app
+- [ ] Deploy auto-build feature to production
+
+## Phase 50: Add Console/Build Logs Tab
+- [x] Add Console tab to Project page UI (alongside Preview and Code)
+- [x] Update useSocket to capture build output logs
+- [x] Stream build logs via WebSocket to Console tab
+- [x] Display build errors clearly in Console
+- [x] Add auto-scroll to Console for latest logs
+- [ ] Test Console tab with build errors
+
+## Phase 51: P0 Critical Fixes - Context Persistence
+- [x] Load conversation history from database when project opens
+- [x] Pass conversation context to Aider session
+- [x] Optimize context loading (limit to last 50 messages)
+- [x] Add database index on conversationId column
+- [ ] Test: Open existing project, verify AI remembers context
+- [ ] Test: Send follow-up message, verify continuity
+
+## Phase 52: P0 Critical Fixes - Auto Build Error Detection
+- [x] Keep Aider session alive during build process
+- [x] Stream build output to AI in real-time
+- [x] Detect build failures automatically
+- [x] Send build errors to AI for analysis
+- [x] Implement retry logic (max 3 attempts)
+- [x] Show build status in chat UI
+- [ ] Test: Create app with intentional error, verify AI fixes it
+- [ ] Test: Verify auto-retry works correctly
+
+## Phase 53: P0 Critical Fixes - Basic App Validation
+- [ ] Test 1: Todo app (add/delete functionality)
+- [ ] Test 2: Counter app (increment/decrement)
+- [ ] Test 3: Calculator app (basic operations)
+- [ ] Test 4: Weather app (display mock data)
+- [ ] Test 5: Contact form (with validation)
+- [ ] Document test results and success rate
+- [ ] Create checkpoint after all tests pass
+
+## Phase 54: CRITICAL - Fix Chat Flickering and Output Issues
+- [x] Filter Aider stdout to remove "Skipping" messages
+- [x] Filter Aider stdout to remove node_modules noise
+- [x] Only show meaningful AI responses in chat
+- [x] Keep full output in Console tab for debugging
+- [x] Fix chat history not loading when project reopened
+- [ ] Test: Verify chat doesn't flicker during generation
+- [ ] Test: Verify chat history persists across sessions
+
+## Phase 55: Auto-Refresh Preview on Build Success
+- [x] Refresh preview iframe on each successful build attempt
+- [x] Show visual indicator when preview is refreshing
+- [x] Ensure preview updates even during retry attempts
+- [ ] Test: Verify preview refreshes after each successful build
+
+## Phase 56: Fix Build Status Indicator After Retry
+- [x] Clear "Build failed" indicator when retry succeeds
+- [x] Update preview pane status from "Build failed" to "Success"
+- [x] Remove error message from preview when build succeeds
+- [ ] Test: Verify status updates correctly after retry
+
+## Phase 57: Add Persistent Retry Status Banner (Future Enhancement)
+- [ ] Add status banner showing "AI is fixing build errors... (attempt X/3)"
+- [ ] Show progress indicator during retry process
+- [ ] Replace quick toast with persistent banner during fixes
+- [ ] Add visual feedback for each retry phase (analyzing, fixing, building)
+- [ ] Keep banner visible until final result (success or max retries)
+
+## Phase 58: Auto-Switch to Preview Tab After Build
+- [x] Auto-switch from Console to Preview tab when build succeeds
+- [x] Only switch if user is on Console tab (don't interrupt if on Code tab)
+- [ ] Add smooth transition animation
+- [ ] Test: Verify tab switches automatically after successful build
+
+## Phase 59: Fix Preview Server File Serving
+- [x] Fix MIME type errors for JavaScript modules
+- [x] Ensure dist/ folder files are served correctly
+- [x] Fix module loading errors (index-*.js files)
+- [ ] Test: Verify preview loads after build without console errors
+
+## Phase 60: Fix Preview Server Caching
+- [x] Add Cache-Control: no-cache headers to preview server
+- [x] Ensure index.html is never cached
+- [ ] Test: Verify preview loads fresh HTML after each build
+
+## Phase 61: Fix Preview Server SPA Fallback (CRITICAL)
+- [x] Only return index.html for navigation requests (not .js/.css files)
+- [x] Return proper 404 for missing asset files
+- [ ] Test: Verify JavaScript files load with correct MIME type
+
+## Phase 62: Implement Iframe Hard Reload (FINAL FIX)
+- [x] Use iframe.contentWindow.location.reload(true) for hard reload
+- [x] Bypass all browser cache layers (service worker, disk cache, memory cache)
+- [ ] Test: Verify preview loads fresh HTML after each build
+
+
+## PENDING ISSUES (To be fixed later)
+
+### Preview Loading Issue (React Apps)
+**Status:** PENDING - Needs deeper investigation
+**Problem:** Preview iframe not loading React apps after build, showing MIME type errors
+**Root Cause:** Browser caching stale index.html with old asset hashes, even with:
+- Cache-control headers ✅
+- Query parameter cache busting ✅
+- Iframe src manipulation ✅
+- Hard reload via contentWindow.location.reload() ✅
+
+**Possible Solutions to Try:**
+1. Use a reverse proxy to add stronger cache headers
+2. Serve preview from a different subdomain for each build
+3. Investigate if there's a service worker interfering
+4. Use a different preview mechanism (not iframe)
+5. Add meta tags to index.html via post-build script
+
+**Workaround:** Users can manually refresh the preview (Ctrl+F5) or click the Refresh button

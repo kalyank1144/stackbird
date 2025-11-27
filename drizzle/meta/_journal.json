@@ -22,6 +22,20 @@
       "when": 1764073928940,
       "tag": "0002_productive_chimera",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "5",
+      "when": 1764232675225,
+      "tag": "0003_unknown_lifeguard",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "5",
+      "when": 1764233706828,
+      "tag": "0004_low_rattler",
+      "breakpoints": true
     }
   ]
 }

@@ -6,7 +6,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { trpc } from "@/lib/trpc";
 import Editor from "@monaco-editor/react";
-import { ArrowLeft, Loader2, FileText, Sparkles, Eye, Code2, FolderOpen, ChevronRight, ChevronDown, Upload, Github } from "lucide-react";
+import { ArrowLeft, Loader2, FileText, Sparkles, Eye, Code2, FolderOpen, ChevronRight, ChevronDown, Upload, Github, Terminal } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { useSocket } from "@/hooks/useSocket";
 import { Link, useParams } from "wouter";
@@ -87,7 +87,7 @@ export default function Project() {
   const { user, loading: authLoading } = useAuth();
   const [message, setMessage] = useState("");
   const [currentConversationId, setCurrentConversationId] = useState<number | undefined>();
-  const { isConnected, streamingData, clearStreamingData } = useSocket();
+  const { isConnected, streamingData, buildStatus, buildLogs: allBuildLogs, clearStreamingData } = useSocket();
   const [selectedFile, setSelectedFile] = useState<{ path: string; content: string } | null>(null);
   const [editorContent, setEditorContent] = useState("");
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
@@ -96,7 +96,11 @@ export default function Project() {
   const [selectedModelId, setSelectedModelId] = useState<string>(
     getDefaultModel("pro").id
   );
-  const [activeTab, setActiveTab] = useState<"preview" | "code">("preview");
+  const [activeTab, setActiveTab] = useState<"preview" | "code" | "console">("preview");
+  const consoleEndRef = useRef<HTMLDivElement>(null);
+  
+  // Filter build logs for current project
+  const buildLogs = allBuildLogs.filter(log => log.projectId === projectId).map(log => log.log);
   const [githubDialogOpen, setGithubDialogOpen] = useState(false);
   const [repoName, setRepoName] = useState("");
   const [repoDescription, setRepoDescription] = useState("");
@@ -118,6 +122,27 @@ export default function Project() {
     { projectId },
     { enabled: !!projectId }
   );
+  
+  // Force iframe to do a hard reload when preview key changes (bypasses all cache)
+  useEffect(() => {
+    if (iframeRef.current && previewUrl) {
+      const iframe = iframeRef.current;
+      
+      // First load: set src directly
+      if (!iframe.src || iframe.src === 'about:blank') {
+        iframe.src = `${previewUrl.fullUrl}?t=${Date.now()}`;
+      } else {
+        // Subsequent loads: use hard reload to bypass all cache layers
+        try {
+          // This forces a complete reload, bypassing cache (like Ctrl+F5)
+          iframe.contentWindow?.location.reload();
+        } catch (e) {
+          // Fallback if contentWindow is not accessible (cross-origin)
+          iframe.src = `${previewUrl.fullUrl}?t=${Date.now()}`;
+        }
+      }
+    }
+  }, [previewKey, previewUrl]);
 
   const { data: githubStatus } = trpc.github.status.useQuery();
   const { data: repoStatus } = trpc.github.checkRepo.useQuery({ projectId });
@@ -131,6 +156,20 @@ export default function Project() {
       toast.error(error.message);
     },
   });
+
+  // Fetch project conversations
+  const { data: conversations } = trpc.chat.conversations.useQuery({ projectId });
+  
+  // Auto-select most recent conversation when project loads
+  useEffect(() => {
+    if (conversations && conversations.length > 0 && !currentConversationId) {
+      // Sort by createdAt descending and select the most recent
+      const sorted = [...conversations].sort((a, b) => 
+        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      );
+      setCurrentConversationId(sorted[0].id);
+    }
+  }, [conversations, currentConversationId]);
 
   const { data: messages, refetch: refetchMessages } = trpc.chat.history.useQuery(
     { conversationId: currentConversationId! },
@@ -190,6 +229,13 @@ export default function Project() {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, streamingData.content]);
 
+  // Auto-scroll console when new build logs arrive
+  useEffect(() => {
+    if (activeTab === "console") {
+      consoleEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [buildLogs, activeTab]);
+
   // Refetch messages when streaming ends and refresh preview
   useEffect(() => {
     // Only refetch if streaming just ended for the current conversation
@@ -203,6 +249,29 @@ export default function Project() {
       setPreviewKey(prev => prev + 1);
     }
   }, [streamingData.isStreaming, streamingData.conversationId, currentConversationId, refetchMessages, refetchFiles, clearStreamingData]);
+
+  // Auto-refresh preview when build succeeds
+  useEffect(() => {
+    if (!buildStatus.isBuilding && buildStatus.projectId === projectId && !buildStatus.error) {
+      // Build completed successfully, refresh preview
+      console.log("[Project] Build succeeded, refreshing preview");
+      setPreviewKey(prev => prev + 1);
+      const attemptMsg = buildStatus.attempt ? ` (attempt ${buildStatus.attempt}/${buildStatus.maxAttempts})` : "";
+      toast.success(`Build completed${attemptMsg}! Preview updated.`);
+      
+      // Auto-switch to Preview tab if currently on Console tab
+      if (activeTab === "console") {
+        console.log("[Project] Auto-switching to Preview tab");
+        setActiveTab("preview");
+      }
+    } else if (buildStatus.error && buildStatus.projectId === projectId) {
+      // Build failed, show error
+      const attemptMsg = buildStatus.attempt && buildStatus.maxAttempts 
+        ? ` (attempt ${buildStatus.attempt}/${buildStatus.maxAttempts})` 
+        : "";
+      toast.error(`Build failed${attemptMsg}: ${buildStatus.error}`);
+    }
+  }, [buildStatus.isBuilding, buildStatus.projectId, buildStatus.error, buildStatus.attempt, buildStatus.maxAttempts, projectId, activeTab]);
 
   if (authLoading || projectLoading) {
     return (
@@ -390,6 +459,11 @@ export default function Project() {
                   Code
                   {hasUnsavedChanges && <div className="h-2 w-2 rounded-full bg-orange-500" />}
                 </TabsTrigger>
+                <TabsTrigger value="console" className="gap-2">
+                  <Terminal className="h-4 w-4" />
+                  Console
+                  {buildStatus.error && <div className="h-2 w-2 rounded-full bg-red-500" />}
+                </TabsTrigger>
               </TabsList>
             </div>
 
@@ -550,13 +624,50 @@ export default function Project() {
                 )}
               </div>
             </TabsContent>
+
+            <TabsContent value="console" className="flex-1 m-0 flex flex-col overflow-hidden">
+              <div className="flex-1 overflow-hidden flex flex-col">
+                <ScrollArea className="flex-1 p-4 bg-black text-green-400 font-mono text-sm">
+                  {buildLogs.length === 0 ? (
+                    <div className="text-gray-500">No build logs yet. Build logs will appear here when AI generates code.</div>
+                  ) : (
+                    <div className="space-y-1">
+                      {buildLogs.map((log, index) => (
+                        <div key={index} className="whitespace-pre-wrap break-words">
+                          {log}
+                        </div>
+                      ))}
+                      <div ref={consoleEndRef} />
+                    </div>
+                  )}
+                </ScrollArea>
+              </div>
+            </TabsContent>
           </Tabs>
         </div>
 
         {/* Right - Preview Pane */}
         <div className="w-96 border-l flex flex-col bg-muted/30">
           <div className="border-b px-4 py-3 bg-card flex items-center justify-between">
-            <h3 className="text-sm font-semibold">Preview</h3>
+            <div className="flex items-center gap-2">
+              <h3 className="text-sm font-semibold">Preview</h3>
+              {buildStatus.isBuilding && buildStatus.projectId === projectId && (
+                <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                  <Loader2 className="h-3 w-3 animate-spin" />
+                  Building{buildStatus.attempt ? ` (${buildStatus.attempt}/${buildStatus.maxAttempts})` : ''}...
+                </div>
+              )}
+              {!buildStatus.isBuilding && buildStatus.projectId === projectId && buildStatus.error && (
+                <div className="text-xs text-destructive">
+                  Build failed
+                </div>
+              )}
+              {!buildStatus.isBuilding && buildStatus.projectId === projectId && !buildStatus.error && buildStatus.attempt && (
+                <div className="text-xs text-green-600">
+                  ✓ Build successful
+                </div>
+              )}
+            </div>
             <Button
               variant="ghost"
               size="sm"
@@ -572,7 +683,7 @@ export default function Project() {
               <iframe
                 key={previewKey}
                 ref={iframeRef}
-                src={previewUrl.fullUrl}
+                src="about:blank"
                 className="w-full h-full border-0"
                 sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals"
                 title="Live Preview"

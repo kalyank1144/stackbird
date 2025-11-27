@@ -4,13 +4,14 @@ import * as db from "./db";
 import { TRPCError } from "@trpc/server";
 import { AiderSession } from "./aider";
 import { WorkspaceManager } from "./workspace";
-import { ENV } from "./_core/env";
+import { BuildManager } from "./buildManager";
 import { getTemplateById, getAllTemplates } from "./templates";
-import { emitToUser } from "./_core/socket";
+import { emitToUser, getUserSocketEmitter } from "./_core/socket";
 import { executeCode } from "./executor";
 import { GitHubIntegration } from "./github";
 import { hasEnoughCredits, deductCredits, getUserCredits, PLANS, canCreateProject } from "./subscription";
 import { getModelById, canUseModel, getDefaultModel } from "./models";
+import { ENV } from "./_core/env";
 
 export const projectRouter = router({
   templates: publicProcedure.query(() => {
@@ -158,6 +159,16 @@ export const chatRouter = router({
       // Save user message
       await db.createMessage(conversationId, "user", input.message);
 
+      // Load previous conversation messages for context (limit to last 50)
+      const previousMessages = await db.getConversationMessages(conversationId);
+      const contextMessages = previousMessages
+        .slice(-51) // Get last 51 messages (50 previous + 1 current)
+        .slice(0, -1) // Remove the current message we just added
+        .map(m => `${m.role}: ${m.content}`)
+        .join('\n\n');
+      
+      console.log(`[Chat] Loaded ${previousMessages.length - 1} previous messages for context`);
+
       // Initialize workspace if it doesn't exist
       const workspaceExists = await WorkspaceManager.workspaceExists(input.projectId);
       if (!workspaceExists) {
@@ -207,13 +218,23 @@ export const chatRouter = router({
         
         // Collect output from Aider and stream to user
         aider.on("output", (data: string) => {
-          aiResponse += data;
+          // Filter out noise from Aider output
+          const shouldSkip = 
+            data.includes("Skipping") ||
+            data.includes("node_modules") ||
+            data.includes("matches gitignore spec") ||
+            data.includes("Warning: it's best to only add files") ||
+            data.trim().startsWith("────────");
           
-          // Stream chunk to user via WebSocket
-          emitToUser(ctx.user.id, "ai:stream:chunk", {
-            conversationId,
-            chunk: data,
-          });
+          if (!shouldSkip) {
+            aiResponse += data;
+            
+            // Stream chunk to user via WebSocket (only meaningful content)
+            emitToUser(ctx.user.id, "ai:stream:chunk", {
+              conversationId,
+              chunk: data,
+            });
+          }
         });
         
         // Listen to stderr to capture any errors
@@ -229,22 +250,23 @@ export const chatRouter = router({
             // Start Aider with all workspace files in context
             await aider.start(workspaceFiles);
             console.log("[Chat] Aider started with files, sending message");
-            await aider.sendMessage(input.message);
+            
+            // Prepend conversation context if exists
+            let messageWithContext = input.message;
+            if (contextMessages) {
+              messageWithContext = `Previous conversation context:\n${contextMessages}\n\n---\n\nCurrent request: ${input.message}`;
+              console.log("[Chat] Added conversation context to message");
+            }
+            
+            await aider.sendMessage(messageWithContext);
             
             // Wait for aider to finish processing (30 seconds max)
             await new Promise((resolve) => setTimeout(resolve, 30000));
             
-            // Stop Aider
-            try {
-              await aider.stop();
-            } catch (stopError) {
-              console.warn("[Chat] Error stopping Aider:", stopError);
-            }
-
-            // Clean up the response
+            // Clean up the initial response
             const cleanResponse = aiResponse.trim() || "Code generation completed. Check your project files.";
             
-            // Save AI response
+            // Save initial AI response
             await db.createMessage(conversationId, "assistant", cleanResponse);
             
             // Deduct tokens based on model cost
@@ -258,6 +280,99 @@ export const chatRouter = router({
               conversationId,
               response: cleanResponse,
             });
+            
+            // Auto-build React projects after code generation
+            console.log("[Chat] Checking if project needs building...");
+            const isNodeProject = await BuildManager.isNodeProject(input.projectId);
+            
+            if (isNodeProject) {
+              console.log("[Chat] Triggering auto-build for project", input.projectId);
+              emitToUser(ctx.user.id, "build:start", {
+                projectId: input.projectId,
+              });
+              
+              // Build with auto-retry on errors (max 3 attempts)
+              const MAX_BUILD_RETRIES = 3;
+              let buildAttempt = 0;
+              let buildSuccess = false;
+              
+              while (buildAttempt < MAX_BUILD_RETRIES && !buildSuccess) {
+                buildAttempt++;
+                console.log(`[Chat] Build attempt ${buildAttempt}/${MAX_BUILD_RETRIES}`);
+                
+                // Emit build:start for each attempt (including retries)
+                if (buildAttempt > 1) {
+                  emitToUser(ctx.user.id, "build:start", {
+                    projectId: input.projectId,
+                    attempt: buildAttempt,
+                    maxAttempts: MAX_BUILD_RETRIES,
+                  });
+                }
+                
+                const userSocket = getUserSocketEmitter(ctx.user.id);
+                const buildResult = await BuildManager.installAndBuild(input.projectId, { socket: userSocket });
+                
+                if (buildResult.success) {
+                  console.log("[Chat] Build completed successfully");
+                  buildSuccess = true;
+                  emitToUser(ctx.user.id, "build:success", {
+                    projectId: input.projectId,
+                    output: buildResult.output,
+                    attempt: buildAttempt,
+                  });
+                } else {
+                  console.error(`[Chat] Build failed (attempt ${buildAttempt}/${MAX_BUILD_RETRIES}):`, buildResult.error);
+                  emitToUser(ctx.user.id, "build:error", {
+                    projectId: input.projectId,
+                    error: buildResult.error || "Build failed",
+                    attempt: buildAttempt,
+                    maxAttempts: MAX_BUILD_RETRIES,
+                  });
+                  
+                  // If not last attempt, ask AI to fix the error
+                  if (buildAttempt < MAX_BUILD_RETRIES) {
+                    console.log("[Chat] Asking AI to fix build error...");
+                    const fixPrompt = `The build failed with the following error:\n\n${buildResult.error}\n\nPlease analyze this error and fix it. This is attempt ${buildAttempt} of ${MAX_BUILD_RETRIES}.`;
+                    
+                    // Reset AI response buffer
+                    aiResponse = "";
+                    
+                    // Send fix request to Aider
+                    await aider.sendMessage(fixPrompt);
+                    
+                    // Wait for AI to fix (30 seconds)
+                    await new Promise((resolve) => setTimeout(resolve, 30000));
+                    
+                    // Save AI's fix attempt
+                    const fixResponse = aiResponse.trim() || "Attempted to fix build error.";
+                    await db.createMessage(conversationId, "assistant", `Build error fix attempt ${buildAttempt}: ${fixResponse}`);
+                    
+                    emitToUser(ctx.user.id, "ai:stream:end", {
+                      conversationId,
+                      response: fixResponse,
+                    });
+                  }
+                }
+              }
+              
+              // Final build status
+              if (!buildSuccess) {
+                console.error("[Chat] Build failed after", MAX_BUILD_RETRIES, "attempts");
+                const finalError = `Build failed after ${MAX_BUILD_RETRIES} attempts. Please check the Console tab for details.`;
+                await db.createMessage(conversationId, "assistant", finalError);
+                emitToUser(ctx.user.id, "ai:stream:end", {
+                  conversationId,
+                  response: finalError,
+                });
+              }
+            }
+            
+            // Stop Aider after build completes (or if no build needed)
+            try {
+              await aider.stop();
+            } catch (stopError) {
+              console.warn("[Chat] Error stopping Aider:", stopError);
+            }
           } catch (asyncError) {
             console.error("[Chat] Async aider error:", asyncError);
             const errorMessage = asyncError instanceof Error 

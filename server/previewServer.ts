@@ -20,12 +20,28 @@ export function createPreviewMiddleware() {
       }
 
       const projectPath = WorkspaceManager.getProjectPath(projectId);
-      const fullPath = path.join(projectPath, filePath);
+      
+      // Check if dist folder exists (built React app)
+      const distPath = path.join(projectPath, "dist");
+      let basePath = projectPath;
+      
+      try {
+        const distStats = await fs.stat(distPath);
+        if (distStats.isDirectory()) {
+          basePath = distPath;
+          console.log(`[Preview] Serving from dist folder for project ${projectId}`);
+        }
+      } catch {
+        // No dist folder, serve from root
+        console.log(`[Preview] Serving from root folder for project ${projectId}`);
+      }
+      
+      const fullPath = path.join(basePath, filePath);
 
-      // Security check: ensure the path is within the project directory
+      // Security check: ensure the path is within the base directory
       const resolvedPath = path.resolve(fullPath);
-      const resolvedProjectPath = path.resolve(projectPath);
-      if (!resolvedPath.startsWith(resolvedProjectPath)) {
+      const resolvedBasePath = path.resolve(basePath);
+      if (!resolvedPath.startsWith(resolvedBasePath)) {
         return res.status(403).send("Access denied");
       }
 
@@ -38,6 +54,13 @@ export function createPreviewMiddleware() {
           const indexPath = path.join(resolvedPath, "index.html");
           try {
             await fs.access(indexPath);
+            
+            // Set headers before sending
+            res.setHeader("Content-Type", "text/html");
+            res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
+            res.setHeader("Pragma", "no-cache");
+            res.setHeader("Expires", "0");
+            
             return res.sendFile(indexPath);
           } catch {
             return res.status(404).send("No index.html found in directory");
@@ -71,8 +94,35 @@ export function createPreviewMiddleware() {
         res.setHeader("Pragma", "no-cache");
         res.setHeader("Expires", "0");
 
+        // Serve the file
         return res.sendFile(resolvedPath);
-      } catch (error) {
+      } catch (error: any) {
+        // For SPA routing: if file not found and we're serving from dist, return index.html
+        // BUT only for navigation requests (not for .js, .css, .png, etc.)
+        if (basePath.endsWith("dist")) {
+          const ext = path.extname(filePath).toLowerCase();
+          const isAssetRequest = ['.js', '.css', '.png', '.jpg', '.jpeg', '.gif', '.svg', '.ico', '.woff', '.woff2', '.ttf', '.eot', '.json'].includes(ext);
+          
+          // If it's an asset request, return 404 (don't fallback to index.html)
+          if (isAssetRequest) {
+            return res.status(404).send("Asset not found");
+          }
+          
+          // For navigation requests (no extension or .html), return index.html
+          const indexPath = path.join(basePath, "index.html");
+          try {
+            await fs.access(indexPath);
+            
+            res.setHeader("Content-Type", "text/html");
+            res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
+            res.setHeader("Pragma", "no-cache");
+            res.setHeader("Expires", "0");
+            
+            return res.sendFile(indexPath);
+          } catch {
+            return res.status(404).send("File not found");
+          }
+        }
         return res.status(404).send("File not found");
       }
     } catch (error) {
