@@ -87,7 +87,7 @@ export default function Project() {
   const { user, loading: authLoading } = useAuth();
   const [message, setMessage] = useState("");
   const [currentConversationId, setCurrentConversationId] = useState<number | undefined>();
-  const { isConnected, streamingData, clearStreamingData } = useSocket();
+  const { isConnected, streamingData, buildStatus, clearStreamingData } = useSocket();
   const [selectedFile, setSelectedFile] = useState<{ path: string; content: string } | null>(null);
   const [editorContent, setEditorContent] = useState("");
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
@@ -203,6 +203,19 @@ export default function Project() {
       setPreviewKey(prev => prev + 1);
     }
   }, [streamingData.isStreaming, streamingData.conversationId, currentConversationId, refetchMessages, refetchFiles, clearStreamingData]);
+
+  // Auto-refresh preview when build succeeds
+  useEffect(() => {
+    if (!buildStatus.isBuilding && buildStatus.projectId === projectId && !buildStatus.error) {
+      // Build completed successfully, refresh preview
+      console.log("[Project] Build succeeded, refreshing preview");
+      setPreviewKey(prev => prev + 1);
+      toast.success("Build completed! Preview updated.");
+    } else if (buildStatus.error && buildStatus.projectId === projectId) {
+      // Build failed, show error
+      toast.error(`Build failed: ${buildStatus.error}`);
+    }
+  }, [buildStatus.isBuilding, buildStatus.projectId, buildStatus.error, projectId]);
 
   if (authLoading || projectLoading) {
     return (
@@ -556,7 +569,20 @@ export default function Project() {
         {/* Right - Preview Pane */}
         <div className="w-96 border-l flex flex-col bg-muted/30">
           <div className="border-b px-4 py-3 bg-card flex items-center justify-between">
-            <h3 className="text-sm font-semibold">Preview</h3>
+            <div className="flex items-center gap-2">
+              <h3 className="text-sm font-semibold">Preview</h3>
+              {buildStatus.isBuilding && buildStatus.projectId === projectId && (
+                <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                  <Loader2 className="h-3 w-3 animate-spin" />
+                  Building...
+                </div>
+              )}
+              {buildStatus.error && buildStatus.projectId === projectId && (
+                <div className="text-xs text-destructive">
+                  Build failed
+                </div>
+              )}
+            </div>
             <Button
               variant="ghost"
               size="sm"

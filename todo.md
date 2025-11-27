@@ -356,3 +356,11 @@
 - [x] Update DATABASE_URL to force IPv4 connection (requires NODE_OPTIONS env var on Railway)
 - [x] Add connection pooling configuration for Railway (documented in RAILWAY_SETUP.md)
 - [x] Test database connection on Railway (needs NODE_OPTIONS=--dns-result-order=ipv4first)
+
+## Phase 49: Implement Auto-Build for Live Preview
+- [x] Create build manager module to run npm install and build
+- [x] Update preview server to serve from dist/ folder
+- [x] Trigger auto-build after Aider finishes generating code
+- [x] Add build status indicator in UI
+- [ ] Test auto-build with React todo app
+- [ ] Deploy auto-build feature to production

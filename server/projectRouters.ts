@@ -4,13 +4,14 @@ import * as db from "./db";
 import { TRPCError } from "@trpc/server";
 import { AiderSession } from "./aider";
 import { WorkspaceManager } from "./workspace";
-import { ENV } from "./_core/env";
+import { BuildManager } from "./buildManager";
 import { getTemplateById, getAllTemplates } from "./templates";
 import { emitToUser } from "./_core/socket";
 import { executeCode } from "./executor";
 import { GitHubIntegration } from "./github";
 import { hasEnoughCredits, deductCredits, getUserCredits, PLANS, canCreateProject } from "./subscription";
 import { getModelById, canUseModel, getDefaultModel } from "./models";
+import { ENV } from "./_core/env";
 
 export const projectRouter = router({
   templates: publicProcedure.query(() => {
@@ -258,6 +259,41 @@ export const chatRouter = router({
               conversationId,
               response: cleanResponse,
             });
+            
+            // Auto-build React projects after code generation
+            console.log("[Chat] Checking if project needs building...");
+            const isNodeProject = await BuildManager.isNodeProject(input.projectId);
+            if (isNodeProject) {
+              console.log("[Chat] Triggering auto-build for project", input.projectId);
+              emitToUser(ctx.user.id, "build:start", {
+                projectId: input.projectId,
+              });
+              
+              // Run build in background
+              BuildManager.installAndBuild(input.projectId)
+                .then((buildResult) => {
+                  if (buildResult.success) {
+                    console.log("[Chat] Build completed successfully");
+                    emitToUser(ctx.user.id, "build:success", {
+                      projectId: input.projectId,
+                      output: buildResult.output,
+                    });
+                  } else {
+                    console.error("[Chat] Build failed:", buildResult.error);
+                    emitToUser(ctx.user.id, "build:error", {
+                      projectId: input.projectId,
+                      error: buildResult.error || "Build failed",
+                    });
+                  }
+                })
+                .catch((err) => {
+                  console.error("[Chat] Build error:", err);
+                  emitToUser(ctx.user.id, "build:error", {
+                    projectId: input.projectId,
+                    error: err.message,
+                  });
+                });
+            }
           } catch (asyncError) {
             console.error("[Chat] Async aider error:", asyncError);
             const errorMessage = asyncError instanceof Error 

@@ -8,6 +8,12 @@ export interface StreamingMessage {
   projectId?: number;
 }
 
+export interface BuildMessage {
+  projectId: number;
+  output?: string;
+  error?: string;
+}
+
 export function useSocket() {
   const [isConnected, setIsConnected] = useState(false);
   const socketRef = useRef<Socket | null>(null);
@@ -19,6 +25,16 @@ export function useSocket() {
     conversationId: null,
     content: "",
     isStreaming: false,
+  });
+
+  const [buildStatus, setBuildStatus] = useState<{
+    projectId: number | null;
+    isBuilding: boolean;
+    error: string | null;
+  }>({
+    projectId: null,
+    isBuilding: false,
+    error: null,
   });
 
   useEffect(() => {
@@ -82,6 +98,34 @@ export function useSocket() {
       }
     });
 
+    // Listen for build events
+    socket.on("build:start", (data: BuildMessage) => {
+      console.log("[Socket] Build started:", data);
+      setBuildStatus({
+        projectId: data.projectId,
+        isBuilding: true,
+        error: null,
+      });
+    });
+
+    socket.on("build:success", (data: BuildMessage) => {
+      console.log("[Socket] Build succeeded:", data);
+      setBuildStatus({
+        projectId: data.projectId,
+        isBuilding: false,
+        error: null,
+      });
+    });
+
+    socket.on("build:error", (data: BuildMessage) => {
+      console.log("[Socket] Build failed:", data);
+      setBuildStatus({
+        projectId: data.projectId,
+        isBuilding: false,
+        error: data.error || "Build failed",
+      });
+    });
+
     return () => {
       socket.disconnect();
     };
@@ -91,6 +135,7 @@ export function useSocket() {
     socket: socketRef.current,
     isConnected,
     streamingData,
+    buildStatus,
     clearStreamingData: () => setStreamingData({
       conversationId: null,
       content: "",
