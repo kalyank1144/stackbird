@@ -522,3 +522,11 @@
 - [x] Ensure animation stays visible throughout entire retry cycle
 - [x] Fix condition logic in Project.tsx
 - [ ] Test complete flow: build fails → analyzing → fixing → building → success
+
+
+## Phase 68: Fix Animation Stuck and Tab Blocking Issues
+- [x] Clear retryStatus when build succeeds (animation should disappear)
+- [x] Fix tab switching - tabs should be clickable even when animation is showing
+- [x] Listen for build success event and reset retryStatus to "idle"
+- [ ] Test: build fails → retry → success → animation disappears → can switch tabs
+- [ ] Test: build fails → retry → still failing → animation stays → can still switch tabs

@@ -265,11 +265,8 @@ export default function Project() {
         maxAttempts: buildStatus.maxAttempts || 3,
       });
     } else if (!buildStatus.error && buildStatus.attempt) {
-      // Build succeeded
-      setRetryStatus({
-        type: "success",
-        attempt: buildStatus.attempt,
-      });
+      // Build succeeded - clear retry status immediately
+      setRetryStatus({ type: "idle" });
       
       // Auto-switch to Preview tab if currently on Console tab
       if (activeTab === "console") {
@@ -723,7 +720,7 @@ export default function Project() {
           </div>
           <div className="flex-1 relative bg-white">
             {/* Show BuildingPreview when AI is working (analyzing, fixing, or building) */}
-            {retryStatus.type !== "idle" ? (
+            {(retryStatus.type === "analyzing" || retryStatus.type === "fixing" || retryStatus.type === "building") ? (
               <BuildingPreview 
                 attempt={buildStatus.attempt || retryStatus.attempt || 1}
                 maxAttempts={buildStatus.maxAttempts || 3}
