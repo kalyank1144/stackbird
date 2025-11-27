@@ -171,8 +171,11 @@ export class BuildManager {
               resolve({ success: true, output });
             }
           } else {
-            console.error(`[Build] Build failed for project ${projectId}:`, error);
-            resolve({ success: false, output, error });
+            // Combine stdout and stderr for complete error context
+            // Vite often outputs errors to stdout, not stderr
+            const fullError = error || output || "Build failed with unknown error";
+            console.error(`[Build] Build failed for project ${projectId}:`, fullError);
+            resolve({ success: false, output, error: fullError });
           }
         });
 

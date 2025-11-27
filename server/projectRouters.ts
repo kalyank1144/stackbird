@@ -4,6 +4,7 @@ import * as db from "./db";
 import { TRPCError } from "@trpc/server";
 import { AiderSession } from "./aider";
 import { WorkspaceManager } from "./workspace";
+import { parseBuildErrors } from "./errorParser";
 import { BuildManager } from "./buildManager";
 import { getTemplateById, getAllTemplates } from "./templates";
 import { emitToUser, getUserSocketEmitter } from "./_core/socket";
@@ -332,7 +333,15 @@ export const chatRouter = router({
                   // If not last attempt, ask AI to fix the error
                   if (buildAttempt < MAX_BUILD_RETRIES) {
                     console.log("[Chat] Asking AI to fix build error...");
-                    const fixPrompt = `The build failed with the following error:\n\n${buildResult.error}\n\nPlease analyze this error and fix it. This is attempt ${buildAttempt} of ${MAX_BUILD_RETRIES}.`;
+                    
+                    // Parse build errors to extract structured information
+                    const errorOutput = buildResult.error || buildResult.output || "Unknown build error";
+                    const parsedErrors = parseBuildErrors(errorOutput);
+                    
+                    console.log(`[Chat] Parsed ${parsedErrors.errors.length} errors from build output`);
+                    
+                    // Create detailed fix prompt with structured error information
+                    const fixPrompt = `${parsedErrors.detailedMessage}\n\n**This is attempt ${buildAttempt} of ${MAX_BUILD_RETRIES}.**\n\nPlease fix these errors now.`;
                     
                     // Reset AI response buffer
                     aiResponse = "";

@@ -13,6 +13,8 @@ import { Link, useParams } from "wouter";
 import { toast } from "sonner";
 import { APP_TITLE, getLoginUrl } from "@/const";
 import { ModelSelector } from "@/components/ModelSelector";
+import { RetryStatusBanner, type RetryStatus } from "@/components/RetryStatusBanner";
+import { BuildingPreview } from "@/components/BuildingPreview";
 import { getDefaultModel } from "@shared/models";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
@@ -107,6 +109,7 @@ export default function Project() {
   const [isPrivate, setIsPrivate] = useState(false);
   const [previewKey, setPreviewKey] = useState(0);
   const iframeRef = useRef<HTMLIFrameElement>(null);
+  const [retryStatus, setRetryStatus] = useState<RetryStatus>({ type: "idle" });
 
   const { data: project, isLoading: projectLoading } = trpc.projects.get.useQuery(
     { projectId },
@@ -257,32 +260,68 @@ export default function Project() {
     }
   }, [streamingData.isStreaming, streamingData.conversationId, currentConversationId, refetchMessages, refetchFiles, clearStreamingData]);
 
-  // Auto-refresh preview when build succeeds
+  // Update retry status banner based on build status
   useEffect(() => {
-    if (!buildStatus.isBuilding && buildStatus.projectId === projectId && !buildStatus.error) {
-      // Build completed successfully, refresh preview
+    if (buildStatus.projectId !== projectId) return;
+
+    if (buildStatus.isBuilding) {
+      // Building state
+      setRetryStatus({
+        type: "building",
+        attempt: buildStatus.attempt || 1,
+        maxAttempts: buildStatus.maxAttempts || 3,
+      });
+    } else if (!buildStatus.error && buildStatus.attempt) {
+      // Build succeeded - clear retry status immediately
+      setRetryStatus({ type: "idle" });
+
+      // Show success toast
       console.log("[Project] Build succeeded, refreshing preview");
-      const attemptMsg = buildStatus.attempt ? ` (attempt ${buildStatus.attempt}/${buildStatus.maxAttempts})` : "";
+      const attemptMsg = ` (attempt ${buildStatus.attempt}/${buildStatus.maxAttempts})`;
       toast.success(`Build completed${attemptMsg}! Updating preview...`);
 
       // Trigger preview refresh (iframe will reload with delay to ensure files are ready)
       setPreviewKey(prev => prev + 1);
 
-      // Auto-switch to Preview tab after a brief moment to show completion
+      // Auto-switch to Preview tab if currently on Console tab
       if (activeTab === "console") {
         setTimeout(() => {
           console.log("[Project] Auto-switching to Preview tab");
           setActiveTab("preview");
         }, 1000);
       }
-    } else if (buildStatus.error && buildStatus.projectId === projectId) {
-      // Build failed, show error
-      const attemptMsg = buildStatus.attempt && buildStatus.maxAttempts
-        ? ` (attempt ${buildStatus.attempt}/${buildStatus.maxAttempts})`
-        : "";
-      toast.error(`Build failed${attemptMsg}: ${buildStatus.error}`);
+    } else if (buildStatus.error && buildStatus.attempt && buildStatus.maxAttempts) {
+      // Build failed
+      if (buildStatus.attempt >= buildStatus.maxAttempts) {
+        // All attempts exhausted
+        setRetryStatus({
+          type: "failed",
+          attempt: buildStatus.attempt,
+          maxAttempts: buildStatus.maxAttempts,
+        });
+
+        // Show error toast
+        const attemptMsg = ` (attempt ${buildStatus.attempt}/${buildStatus.maxAttempts})`;
+        toast.error(`Build failed${attemptMsg}: ${buildStatus.error}`);
+      } else {
+        // More attempts remaining - AI is analyzing/fixing
+        setRetryStatus({
+          type: "analyzing",
+          attempt: buildStatus.attempt + 1,
+          maxAttempts: buildStatus.maxAttempts,
+        });
+      }
     }
-  }, [buildStatus.isBuilding, buildStatus.projectId, buildStatus.error, buildStatus.attempt, buildStatus.maxAttempts, projectId, activeTab]);
+  }, [buildStatus, projectId, activeTab]);
+  
+  // Update retry status when AI is streaming (fixing code)
+  useEffect(() => {
+    if (streamingData.isStreaming && retryStatus.type === "analyzing") {
+      setRetryStatus(prev => 
+        prev.type === "analyzing" ? { ...prev, type: "fixing" } : prev
+      );
+    }
+  }, [streamingData.isStreaming, retryStatus.type]);
 
   if (authLoading || projectLoading) {
     return (
@@ -544,6 +583,13 @@ export default function Project() {
               {/* Input Area */}
               <div className="border-t p-4 bg-card">
                 <div className="max-w-3xl mx-auto space-y-3">
+                  {/* Retry Status Banner - Only show when NOT on preview tab (animation shows there instead) */}
+                  {retryStatus.type !== "idle" && activeTab !== "preview" && (
+                    <RetryStatusBanner 
+                      status={retryStatus} 
+                      onDismiss={() => setRetryStatus({ type: "idle" })}
+                    />
+                  )}
                   <div className="flex gap-3">
                     <Input
                       placeholder="Describe what you want..."
@@ -690,7 +736,14 @@ export default function Project() {
             </Button>
           </div>
           <div className="flex-1 relative bg-white">
-            {previewUrl && files && files.length > 0 ? (
+            {/* Show BuildingPreview when AI is working (analyzing, fixing, or building) */}
+            {(retryStatus.type === "analyzing" || retryStatus.type === "fixing" || retryStatus.type === "building") ? (
+              <BuildingPreview 
+                attempt={buildStatus.attempt || retryStatus.attempt || 1}
+                maxAttempts={buildStatus.maxAttempts || 3}
+                status={retryStatus.type === "analyzing" ? "analyzing" : retryStatus.type === "fixing" ? "fixing" : "building"}
+              />
+            ) : previewUrl && files && files.length > 0 ? (
               <iframe
                 key={previewKey}
                 ref={iframeRef}

@@ -475,3 +475,58 @@
 5. Add meta tags to index.html via post-build script
 
 **Workaround:** Users can manually refresh the preview (Ctrl+F5) or click the Refresh button
+
+
+## Phase 63: Better Error Messages to AI
+- [x] Parse build output to extract specific errors (file, line, message)
+- [x] Extract TypeScript/ESLint errors with file paths and line numbers
+- [x] Extract Vite build errors with context
+- [x] Format errors in structured way for AI to understand
+- [x] Send detailed error context to Aider instead of generic "Build failed"
+- [x] Include relevant file content around error location
+
+## Phase 64: Stunning Persistent Retry Status Banner
+- [x] Design modern, animated banner component
+- [x] Show current AI activity: "Analyzing errors...", "Fixing code...", "Building..."
+- [x] Add progress indicator (attempt 1/3, 2/3, 3/3)
+- [x] Use smooth animations and transitions
+- [x] Add pulsing/shimmer effects for "working" state
+- [x] Show success/error states with icons
+- [x] Make banner dismissible but persistent across tabs
+- [x] Position banner prominently (top of chat or preview area)
+
+
+## Phase 65: Fix Error Message Truncation Bug
+- [x] Investigate why build error messages are being truncated (only "error during build:" sent to AI)
+- [x] Check buildManager error capture logic
+- [x] Ensure full error output is captured (both stdout and stderr)
+- [x] Verify error parser receives complete error text
+- [x] Test that AI receives full error details including file paths and line numbers
+- [ ] Test AI can fix tsconfig.node.json missing file error
+
+
+## Phase 66: AI Workshop Preview Visualization
+- [x] Create BuildingPreview component with cute robot character
+- [x] Add floating code snippet animations
+- [x] Implement step-by-step progress checklist (Reading errors, Analyzing code, Writing fix, Building)
+- [x] Add smooth animations and transitions
+- [x] Integrate with Project.tsx preview pane
+- [x] Show BuildingPreview when build is in progress
+- [x] Hide BuildingPreview and show iframe when build succeeds
+- [ ] Test with real build/retry cycle
+
+
+## Phase 67: Fix AI Workshop Animation Visibility
+- [x] Show BuildingPreview during ALL retry states (analyzing, fixing, building)
+- [x] Hide banner when animation is active in preview pane
+- [x] Ensure animation stays visible throughout entire retry cycle
+- [x] Fix condition logic in Project.tsx
+- [ ] Test complete flow: build fails → analyzing → fixing → building → success
+
+
+## Phase 68: Fix Animation Stuck and Tab Blocking Issues
+- [x] Clear retryStatus when build succeeds (animation should disappear)
+- [x] Fix tab switching - tabs should be clickable even when animation is showing
+- [x] Listen for build success event and reset retryStatus to "idle"
+- [ ] Test: build fails → retry → success → animation disappears → can switch tabs
+- [ ] Test: build fails → retry → still failing → animation stays → can still switch tabs
