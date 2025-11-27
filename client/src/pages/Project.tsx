@@ -130,20 +130,27 @@ export default function Project() {
   useEffect(() => {
     if (iframeRef.current && previewUrl) {
       const iframe = iframeRef.current;
-      
-      // First load: set src directly
-      if (!iframe.src || iframe.src === 'about:blank') {
-        iframe.src = `${previewUrl.fullUrl}?t=${Date.now()}`;
-      } else {
-        // Subsequent loads: use hard reload to bypass all cache layers
-        try {
-          // This forces a complete reload, bypassing cache (like Ctrl+F5)
-          iframe.contentWindow?.location.reload();
-        } catch (e) {
-          // Fallback if contentWindow is not accessible (cross-origin)
-          iframe.src = `${previewUrl.fullUrl}?t=${Date.now()}`;
+
+      // Add delay to ensure dist files are fully written after build
+      const delayedReload = setTimeout(() => {
+        // First load: set src directly
+        if (!iframe.src || iframe.src === 'about:blank') {
+          iframe.src = `${previewUrl.fullUrl}?t=${Date.now()}&r=${Math.random()}`;
+        } else {
+          // Subsequent loads: use hard reload to bypass all cache layers
+          try {
+            // Aggressive cache busting with timestamp + random ID
+            const cacheBuster = `?t=${Date.now()}&r=${Math.random()}`;
+            const newUrl = previewUrl.fullUrl.split('?')[0] + cacheBuster;
+            iframe.src = newUrl;
+          } catch (e) {
+            // Fallback if there's any error
+            iframe.src = `${previewUrl.fullUrl}?t=${Date.now()}&r=${Math.random()}`;
+          }
         }
-      }
+      }, 800); // Wait 800ms to ensure file system has flushed all changes
+
+      return () => clearTimeout(delayedReload);
     }
   }, [previewKey, previewUrl]);
 
@@ -256,7 +263,7 @@ export default function Project() {
   // Update retry status banner based on build status
   useEffect(() => {
     if (buildStatus.projectId !== projectId) return;
-    
+
     if (buildStatus.isBuilding) {
       // Building state
       setRetryStatus({
@@ -267,16 +274,22 @@ export default function Project() {
     } else if (!buildStatus.error && buildStatus.attempt) {
       // Build succeeded - clear retry status immediately
       setRetryStatus({ type: "idle" });
-      
+
+      // Show success toast
+      console.log("[Project] Build succeeded, refreshing preview");
+      const attemptMsg = ` (attempt ${buildStatus.attempt}/${buildStatus.maxAttempts})`;
+      toast.success(`Build completed${attemptMsg}! Updating preview...`);
+
+      // Trigger preview refresh (iframe will reload with delay to ensure files are ready)
+      setPreviewKey(prev => prev + 1);
+
       // Auto-switch to Preview tab if currently on Console tab
       if (activeTab === "console") {
-        console.log("[Project] Auto-switching to Preview tab");
-        setActiveTab("preview");
+        setTimeout(() => {
+          console.log("[Project] Auto-switching to Preview tab");
+          setActiveTab("preview");
+        }, 1000);
       }
-      
-      // Refresh preview
-      console.log("[Project] Build succeeded, refreshing preview");
-      setPreviewKey(prev => prev + 1);
     } else if (buildStatus.error && buildStatus.attempt && buildStatus.maxAttempts) {
       // Build failed
       if (buildStatus.attempt >= buildStatus.maxAttempts) {
@@ -286,6 +299,10 @@ export default function Project() {
           attempt: buildStatus.attempt,
           maxAttempts: buildStatus.maxAttempts,
         });
+
+        // Show error toast
+        const attemptMsg = ` (attempt ${buildStatus.attempt}/${buildStatus.maxAttempts})`;
+        toast.error(`Build failed${attemptMsg}: ${buildStatus.error}`);
       } else {
         // More attempts remaining - AI is analyzing/fixing
         setRetryStatus({

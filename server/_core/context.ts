@@ -2,6 +2,7 @@ import type { CreateExpressContextOptions } from "@trpc/server/adapters/express"
 import type { User } from "../../drizzle/schema";
 import { sdk } from "./sdk";
 import { upsertUser } from "../db";
+import { initializeUserCredits } from "../subscription";
 
 export type TrpcContext = {
   req: CreateExpressContextOptions["req"];
@@ -39,6 +40,16 @@ export async function createContext(
         role: GUEST_USER.role,
         lastSignedIn: GUEST_USER.lastSignedIn,
       });
+
+      // Initialize guest user with pro plan for local development
+      try {
+        await initializeUserCredits(GUEST_USER.id, "pro");
+        console.log("[Auth] Guest user initialized with Pro plan");
+      } catch (creditsError) {
+        // Credits might already exist, that's ok
+        console.log("[Auth] Guest user credits already initialized");
+      }
+
       guestUserInitialized = true;
       console.log("[Auth] Guest user initialized in database");
     } catch (error) {
