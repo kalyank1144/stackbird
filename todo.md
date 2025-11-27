@@ -336,4 +336,11 @@
 - [x] Investigate why Aider uses parent repo instead of project workspace git (template files not committed)
 - [x] Fix Aider initialization to use correct git repository (added commitTemplateFiles method)
 - [x] Test that Aider can access React template files (template-git.test.ts passes)
+- [x] Deploy fix to production
+
+## Phase 46: Fix Project Access Errors
+- [x] Investigate why project 180001 shows "Project not found" and "Access denied" (guest user not in database)
+- [x] Check database and workspace sync for guest user (guest user ID 1 doesn't exist)
+- [x] Fix project ownership or database entries (added guest user upsert on startup)
+- [x] Test project access works correctly (projects.test.ts passes)
 - [ ] Deploy fix to production

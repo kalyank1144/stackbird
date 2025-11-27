@@ -1,0 +1,70 @@
+{
+  "query": "SELECT id, name, userId, createdAt FROM projects ORDER BY id DESC LIMIT 10",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2A3NTnUGoJXxPqe.6d3ff4ccfff9 --database ZHaFUAeqZJ8Zmr7GWk7tSr --execute SELECT id, name, userId, createdAt FROM projects ORDER BY id DESC LIMIT 10",
+  "rows": [
+    {
+      "id": "210019",
+      "name": "History Test Project",
+      "userId": "1",
+      "createdAt": "2025-11-27 06:22:30"
+    },
+    {
+      "id": "210018",
+      "name": "Git Test Project",
+      "userId": "1",
+      "createdAt": "2025-11-27 06:22:30"
+    },
+    {
+      "id": "210015",
+      "name": "Chat Test Project",
+      "userId": "1",
+      "createdAt": "2025-11-27 06:22:30"
+    },
+    {
+      "id": "210013",
+      "name": "User 1 Project",
+      "userId": "1",
+      "createdAt": "2025-11-27 06:22:30"
+    },
+    {
+      "id": "210010",
+      "name": "Test Project",
+      "userId": "1",
+      "createdAt": "2025-11-27 06:22:30"
+    },
+    {
+      "id": "210008",
+      "name": "Test Project 1",
+      "userId": "1",
+      "createdAt": "2025-11-27 06:22:30"
+    },
+    {
+      "id": "210006",
+      "name": "Test Project",
+      "userId": "1",
+      "createdAt": "2025-11-27 06:22:29"
+    },
+    {
+      "id": "210005",
+      "name": "Git Test Project",
+      "userId": "1",
+      "createdAt": "2025-11-27 06:22:07"
+    },
+    {
+      "id": "180004",
+      "name": "todo",
+      "userId": "1",
+      "createdAt": "2025-11-27 06:10:09"
+    },
+    {
+      "id": "120028",
+      "name": "Test Model Project",
+      "userId": "1",
+      "createdAt": "2025-11-26 08:18:39"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tname\tuserId\tcreatedAt\n210019\tHistory Test Project\t1\t2025-11-27 06:22:30\n210018\tGit Test Project\t1\t2025-11-27 06:22:30\n210015\tChat Test Project\t1\t2025-11-27 06:22:30\n210013\tUser 1 Project\t1\t2025-11-27 06:22:30\n210010\tTest Project\t1\t2025-11-27 06:22:30\n210008\tTest Project 1\t1\t2025-11-27 06:22:30\n210006\tTest Project\t1\t2025-11-27 06:22:29\n210005\tGit Test Project\t1\t2025-11-27 06:22:07\n180004\ttodo\t1\t2025-11-27 06:10:09\n120028\tTest Model Project\t1\t2025-11-26 08:18:39\n",
+  "stderr": "",
+  "execution_time_ms": 51
+}

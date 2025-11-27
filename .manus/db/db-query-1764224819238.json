@@ -1,0 +1,9 @@
+{
+  "query": "SELECT p.*, u.openId FROM projects p JOIN users u ON p.userId = u.id WHERE u.openId = 'guest-user'",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2A3NTnUGoJXxPqe.6d3ff4ccfff9 --database ZHaFUAeqZJ8Zmr7GWk7tSr --execute SELECT p.*, u.openId FROM projects p JOIN users u ON p.userId = u.id WHERE u.openId = 'guest-user'",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 51
+}
