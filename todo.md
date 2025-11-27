@@ -439,3 +439,8 @@
 - [x] Ensure dist/ folder files are served correctly
 - [x] Fix module loading errors (index-*.js files)
 - [ ] Test: Verify preview loads after build without console errors
+
+## Phase 60: Fix Preview Server Caching
+- [x] Add Cache-Control: no-cache headers to preview server
+- [x] Ensure index.html is never cached
+- [ ] Test: Verify preview loads fresh HTML after each build

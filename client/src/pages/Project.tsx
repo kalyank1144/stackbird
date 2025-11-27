@@ -122,6 +122,19 @@ export default function Project() {
     { projectId },
     { enabled: !!projectId }
   );
+  
+  // Force iframe to reload when preview key changes
+  useEffect(() => {
+    if (iframeRef.current && previewUrl) {
+      // Force reload by setting src to empty then back to the URL
+      const iframe = iframeRef.current;
+      const newSrc = `${previewUrl.fullUrl}?t=${Date.now()}`;
+      iframe.src = 'about:blank';
+      setTimeout(() => {
+        iframe.src = newSrc;
+      }, 10);
+    }
+  }, [previewKey, previewUrl]);
 
   const { data: githubStatus } = trpc.github.status.useQuery();
   const { data: repoStatus } = trpc.github.checkRepo.useQuery({ projectId });
@@ -662,7 +675,7 @@ export default function Project() {
               <iframe
                 key={previewKey}
                 ref={iframeRef}
-                src={`${previewUrl.fullUrl}?t=${previewKey}`}
+                src="about:blank"
                 className="w-full h-full border-0"
                 sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals"
                 title="Live Preview"
