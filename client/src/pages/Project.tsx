@@ -569,8 +569,8 @@ export default function Project() {
               {/* Input Area */}
               <div className="border-t p-4 bg-card">
                 <div className="max-w-3xl mx-auto space-y-3">
-                  {/* Retry Status Banner */}
-                  {retryStatus.type !== "idle" && (
+                  {/* Retry Status Banner - Only show when NOT on preview tab (animation shows there instead) */}
+                  {retryStatus.type !== "idle" && activeTab !== "preview" && (
                     <RetryStatusBanner 
                       status={retryStatus} 
                       onDismiss={() => setRetryStatus({ type: "idle" })}
@@ -722,10 +722,10 @@ export default function Project() {
             </Button>
           </div>
           <div className="flex-1 relative bg-white">
-            {/* Show BuildingPreview when build is in progress */}
-            {buildStatus.isBuilding && buildStatus.projectId === projectId && retryStatus.type !== "idle" ? (
+            {/* Show BuildingPreview when AI is working (analyzing, fixing, or building) */}
+            {retryStatus.type !== "idle" ? (
               <BuildingPreview 
-                attempt={buildStatus.attempt || 1}
+                attempt={buildStatus.attempt || retryStatus.attempt || 1}
                 maxAttempts={buildStatus.maxAttempts || 3}
                 status={retryStatus.type === "analyzing" ? "analyzing" : retryStatus.type === "fixing" ? "fixing" : "building"}
               />

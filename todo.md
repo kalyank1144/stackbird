@@ -514,3 +514,11 @@
 - [x] Show BuildingPreview when build is in progress
 - [x] Hide BuildingPreview and show iframe when build succeeds
 - [ ] Test with real build/retry cycle
+
+
+## Phase 67: Fix AI Workshop Animation Visibility
+- [x] Show BuildingPreview during ALL retry states (analyzing, fixing, building)
+- [x] Hide banner when animation is active in preview pane
+- [x] Ensure animation stays visible throughout entire retry cycle
+- [x] Fix condition logic in Project.tsx
+- [ ] Test complete flow: build fails → analyzing → fixing → building → success
