@@ -235,12 +235,16 @@ export default function Project() {
       // Build completed successfully, refresh preview
       console.log("[Project] Build succeeded, refreshing preview");
       setPreviewKey(prev => prev + 1);
-      toast.success("Build completed! Preview updated.");
+      const attemptMsg = buildStatus.attempt ? ` (attempt ${buildStatus.attempt}/${buildStatus.maxAttempts})` : "";
+      toast.success(`Build completed${attemptMsg}! Preview updated.`);
     } else if (buildStatus.error && buildStatus.projectId === projectId) {
       // Build failed, show error
-      toast.error(`Build failed: ${buildStatus.error}`);
+      const attemptMsg = buildStatus.attempt && buildStatus.maxAttempts 
+        ? ` (attempt ${buildStatus.attempt}/${buildStatus.maxAttempts})` 
+        : "";
+      toast.error(`Build failed${attemptMsg}: ${buildStatus.error}`);
     }
-  }, [buildStatus.isBuilding, buildStatus.projectId, buildStatus.error, projectId]);
+  }, [buildStatus.isBuilding, buildStatus.projectId, buildStatus.error, buildStatus.attempt, buildStatus.maxAttempts, projectId]);
 
   if (authLoading || projectLoading) {
     return (

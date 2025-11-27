@@ -408,3 +408,9 @@
 - [x] Fix chat history not loading when project reopened
 - [ ] Test: Verify chat doesn't flicker during generation
 - [ ] Test: Verify chat history persists across sessions
+
+## Phase 55: Auto-Refresh Preview on Build Success
+- [x] Refresh preview iframe on each successful build attempt
+- [x] Show visual indicator when preview is refreshing
+- [x] Ensure preview updates even during retry attempts
+- [ ] Test: Verify preview refreshes after each successful build

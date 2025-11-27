@@ -300,6 +300,15 @@ export const chatRouter = router({
                 buildAttempt++;
                 console.log(`[Chat] Build attempt ${buildAttempt}/${MAX_BUILD_RETRIES}`);
                 
+                // Emit build:start for each attempt (including retries)
+                if (buildAttempt > 1) {
+                  emitToUser(ctx.user.id, "build:start", {
+                    projectId: input.projectId,
+                    attempt: buildAttempt,
+                    maxAttempts: MAX_BUILD_RETRIES,
+                  });
+                }
+                
                 const userSocket = getUserSocketEmitter(ctx.user.id);
                 const buildResult = await BuildManager.installAndBuild(input.projectId, { socket: userSocket });
                 

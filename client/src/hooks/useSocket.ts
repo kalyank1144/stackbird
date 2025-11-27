@@ -12,6 +12,8 @@ export interface BuildMessage {
   projectId: number;
   output?: string;
   error?: string;
+  attempt?: number;
+  maxAttempts?: number;
 }
 
 export function useSocket() {
@@ -31,6 +33,8 @@ export function useSocket() {
     projectId: number | null;
     isBuilding: boolean;
     error: string | null;
+    attempt?: number;
+    maxAttempts?: number;
   }>({
     projectId: null,
     isBuilding: false,
@@ -107,6 +111,8 @@ export function useSocket() {
         projectId: data.projectId,
         isBuilding: true,
         error: null,
+        attempt: data.attempt,
+        maxAttempts: data.maxAttempts,
       });
       // Clear previous logs for this project
       setBuildLogs(prev => prev.filter(l => l.projectId !== data.projectId));
@@ -121,6 +127,8 @@ export function useSocket() {
         projectId: data.projectId,
         isBuilding: false,
         error: null,
+        attempt: data.attempt,
+        maxAttempts: data.maxAttempts,
       });
       if (data.output) {
         setBuildLogs(prev => [...prev, { projectId: data.projectId, log: data.output! }]);
@@ -133,9 +141,11 @@ export function useSocket() {
         projectId: data.projectId,
         isBuilding: false,
         error: data.error || "Build failed",
+        attempt: data.attempt,
+        maxAttempts: data.maxAttempts,
       });
-      if (data.error) {
-        setBuildLogs(prev => [...prev, { projectId: data.projectId, log: `ERROR: ${data.error}` }]);
+      if (data.output) {
+        setBuildLogs(prev => [...prev, { projectId: data.projectId, log: data.output! }]);
       }
     });
 
