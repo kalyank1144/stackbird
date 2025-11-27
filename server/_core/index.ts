@@ -57,12 +57,11 @@ async function startServer() {
     serveStatic(app);
   }
 
-  const preferredPort = parseInt(process.env.PORT || "3000");
-  const port = await findAvailablePort(preferredPort);
-
-  if (port !== preferredPort) {
-    console.log(`Port ${preferredPort} is busy, using port ${port} instead`);
-  }
+  // Railway and other cloud platforms set PORT env var - use it directly
+  // Only search for available port in development when PORT is not set
+  const port = process.env.PORT 
+    ? parseInt(process.env.PORT) 
+    : await findAvailablePort(3000);
 
   server.listen(port, () => {
     console.log(`Server running on http://localhost:${port}/`);
