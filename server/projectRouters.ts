@@ -49,6 +49,8 @@ export const projectRouter = router({
           for (const file of template.files) {
             await WorkspaceManager.writeFile(projectId, file.path, file.content);
           }
+          // Commit template files to git
+          await WorkspaceManager.commitTemplateFiles(projectId, template.name);
         }
       }
       

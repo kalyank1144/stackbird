@@ -42,6 +42,38 @@ export class WorkspaceManager {
   }
 
   /**
+   * Commit template files to git after template initialization
+   */
+  static async commitTemplateFiles(projectId: number, templateName: string): Promise<void> {
+    const projectPath = this.getProjectPath(projectId);
+    try {
+      // Initialize git if not already done
+      await this.initializeGit(projectPath);
+      
+      // Add all template files
+      execSync("git add .", { cwd: projectPath, stdio: "pipe" });
+      
+      // Check if there are changes to commit
+      try {
+        execSync("git diff --cached --quiet", { cwd: projectPath, stdio: "pipe" });
+        // No changes to commit
+        console.log(`[Workspace] No template changes to commit in ${projectPath}`);
+        return;
+      } catch {
+        // There are changes, proceed with commit
+      }
+      
+      // Commit template files
+      const commitMessage = `Add ${templateName} template`;
+      execSync(`git commit -m "${commitMessage}"`, { cwd: projectPath, stdio: "pipe" });
+      console.log(`[Workspace] Committed template files in ${projectPath}`);
+    } catch (error) {
+      console.error(`[Workspace] Failed to commit template files in ${projectPath}:`, error);
+      // Don't throw - git commit failure shouldn't break project creation
+    }
+  }
+
+  /**
    * Initialize git repository in workspace
    */
   static async initializeGit(projectPath: string): Promise<void> {

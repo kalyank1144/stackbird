@@ -330,4 +330,10 @@
 - [x] Investigate why projects are using Flask instead of React template (wrong template ID: 'react' vs 'react-app')
 - [x] Fix template initialization in project creation backend (changed to 'react-app')
 - [x] Test that React template is properly applied (templates.test.ts passes)
+- [x] Deploy fix to production
+
+## Phase 45: Fix Aider Git Repository Detection
+- [x] Investigate why Aider uses parent repo instead of project workspace git (template files not committed)
+- [x] Fix Aider initialization to use correct git repository (added commitTemplateFiles method)
+- [x] Test that Aider can access React template files (template-git.test.ts passes)
 - [ ] Deploy fix to production
