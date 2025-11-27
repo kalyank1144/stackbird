@@ -98,7 +98,17 @@ export function createPreviewMiddleware() {
         return res.sendFile(resolvedPath);
       } catch (error: any) {
         // For SPA routing: if file not found and we're serving from dist, return index.html
+        // BUT only for navigation requests (not for .js, .css, .png, etc.)
         if (basePath.endsWith("dist")) {
+          const ext = path.extname(filePath).toLowerCase();
+          const isAssetRequest = ['.js', '.css', '.png', '.jpg', '.jpeg', '.gif', '.svg', '.ico', '.woff', '.woff2', '.ttf', '.eot', '.json'].includes(ext);
+          
+          // If it's an asset request, return 404 (don't fallback to index.html)
+          if (isAssetRequest) {
+            return res.status(404).send("Asset not found");
+          }
+          
+          // For navigation requests (no extension or .html), return index.html
           const indexPath = path.join(basePath, "index.html");
           try {
             await fs.access(indexPath);

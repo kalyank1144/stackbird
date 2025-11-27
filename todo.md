@@ -444,3 +444,8 @@
 - [x] Add Cache-Control: no-cache headers to preview server
 - [x] Ensure index.html is never cached
 - [ ] Test: Verify preview loads fresh HTML after each build
+
+## Phase 61: Fix Preview Server SPA Fallback (CRITICAL)
+- [x] Only return index.html for navigation requests (not .js/.css files)
+- [x] Return proper 404 for missing asset files
+- [ ] Test: Verify JavaScript files load with correct MIME type
