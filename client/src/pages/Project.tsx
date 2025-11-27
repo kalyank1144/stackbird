@@ -136,6 +136,20 @@ export default function Project() {
     },
   });
 
+  // Fetch project conversations
+  const { data: conversations } = trpc.chat.conversations.useQuery({ projectId });
+  
+  // Auto-select most recent conversation when project loads
+  useEffect(() => {
+    if (conversations && conversations.length > 0 && !currentConversationId) {
+      // Sort by createdAt descending and select the most recent
+      const sorted = [...conversations].sort((a, b) => 
+        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      );
+      setCurrentConversationId(sorted[0].id);
+    }
+  }, [conversations, currentConversationId]);
+
   const { data: messages, refetch: refetchMessages } = trpc.chat.history.useQuery(
     { conversationId: currentConversationId! },
     { enabled: !!currentConversationId }

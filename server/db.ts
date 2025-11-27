@@ -141,7 +141,15 @@ export async function createMessage(conversationId: number, role: "user" | "assi
   const db = await getDb();
   if (!db) throw new Error("Database not available");
   
-  const result = await db.insert(messages).values({ conversationId, role, content });
+  // Safety: Truncate extremely long content (LONGTEXT limit is 4GB, but let's be safe at 1MB)
+  const MAX_CONTENT_LENGTH = 1_000_000; // 1MB
+  let safeContent = content;
+  if (content.length > MAX_CONTENT_LENGTH) {
+    console.warn(`[DB] Message content truncated from ${content.length} to ${MAX_CONTENT_LENGTH} chars`);
+    safeContent = content.substring(0, MAX_CONTENT_LENGTH) + "\n\n[Content truncated due to size]";
+  }
+  
+  const result = await db.insert(messages).values({ conversationId, role, content: safeContent });
   return result[0].insertId;
 }
 

@@ -218,13 +218,23 @@ export const chatRouter = router({
         
         // Collect output from Aider and stream to user
         aider.on("output", (data: string) => {
-          aiResponse += data;
+          // Filter out noise from Aider output
+          const shouldSkip = 
+            data.includes("Skipping") ||
+            data.includes("node_modules") ||
+            data.includes("matches gitignore spec") ||
+            data.includes("Warning: it's best to only add files") ||
+            data.trim().startsWith("────────");
           
-          // Stream chunk to user via WebSocket
-          emitToUser(ctx.user.id, "ai:stream:chunk", {
-            conversationId,
-            chunk: data,
-          });
+          if (!shouldSkip) {
+            aiResponse += data;
+            
+            // Stream chunk to user via WebSocket (only meaningful content)
+            emitToUser(ctx.user.id, "ai:stream:chunk", {
+              conversationId,
+              chunk: data,
+            });
+          }
         });
         
         // Listen to stderr to capture any errors

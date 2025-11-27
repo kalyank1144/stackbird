@@ -1,4 +1,4 @@
-import { index, int, mysqlEnum, mysqlTable, text, timestamp, varchar } from "drizzle-orm/mysql-core";
+import { index, int, longtext, mysqlEnum, mysqlTable, text, timestamp, varchar } from "drizzle-orm/mysql-core";
 
 /**
  * Core user table backing auth flow.
@@ -116,7 +116,7 @@ export const messages = mysqlTable("messages", {
   id: int("id").autoincrement().primaryKey(),
   conversationId: int("conversationId").notNull().references(() => conversations.id, { onDelete: "cascade" }),
   role: mysqlEnum("role", ["user", "assistant", "system"]).notNull(),
-  content: text("content").notNull(),
+  content: longtext("content").notNull(), // LONGTEXT for large AI responses (4GB limit)
   createdAt: timestamp("createdAt").defaultNow().notNull(),
 }, (table) => ({
   conversationIdIdx: index("conversationId_idx").on(table.conversationId),

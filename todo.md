@@ -399,3 +399,12 @@
 - [ ] Test 5: Contact form (with validation)
 - [ ] Document test results and success rate
 - [ ] Create checkpoint after all tests pass
+
+## Phase 54: CRITICAL - Fix Chat Flickering and Output Issues
+- [x] Filter Aider stdout to remove "Skipping" messages
+- [x] Filter Aider stdout to remove node_modules noise
+- [x] Only show meaningful AI responses in chat
+- [x] Keep full output in Console tab for debugging
+- [x] Fix chat history not loading when project reopened
+- [ ] Test: Verify chat doesn't flicker during generation
+- [ ] Test: Verify chat history persists across sessions
