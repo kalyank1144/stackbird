@@ -65,10 +65,13 @@ const CloudProvidersTab = () => {
   const [filteredProviders, setFilteredProviders] = useState<IProviderConfig[]>([]);
   const [categoryEnabled, setCategoryEnabled] = useState<boolean>(false);
 
-  // Load and filter providers
+  // Platform-controlled providers - only show providers with server-side API keys
+  const PLATFORM_PROVIDERS = ['Anthropic'];
+
+  // Load and filter providers - only show platform-controlled providers
   useEffect(() => {
     const newFilteredProviders = Object.entries(settings.providers || {})
-      .filter(([key]) => !['Ollama', 'LMStudio', 'OpenAILike'].includes(key))
+      .filter(([key]) => PLATFORM_PROVIDERS.includes(key))
       .map(([key, value]) => ({
         name: key,
         settings: value.settings,

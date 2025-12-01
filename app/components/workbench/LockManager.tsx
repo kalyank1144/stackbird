@@ -140,16 +140,16 @@ export function LockManager() {
       : false;
 
   return (
-    <div className="flex flex-col h-full overflow-hidden">
+    <div className="flex flex-col h-full overflow-hidden bg-white/50 dark:bg-slate-900/50">
       {/* Controls */}
-      <div className="flex items-center gap-1 px-2 py-1 border-b border-bolt-elements-borderColor">
+      <div className="flex items-center gap-2 px-3 py-2 border-b border-gray-200/50 dark:border-slate-700/50">
         {/* Search Input */}
         <div className="relative flex-1">
-          <span className="absolute left-2 top-1/2 -translate-y-1/2 text-bolt-elements-textTertiary i-ph:magnifying-glass text-xs pointer-events-none" />
+          <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 i-ph:magnifying-glass text-xs pointer-events-none" />
           <input
             type="text"
             placeholder="Search..."
-            className="w-full text-xs pl-6 pr-2 py-0.5 h-6 bg-bolt-elements-background-depth-2 text-bolt-elements-textPrimary rounded border border-bolt-elements-borderColor focus:outline-none"
+            className="w-full text-xs pl-7 pr-2 py-1.5 h-7 bg-gray-50/80 dark:bg-slate-800/80 text-gray-700 dark:text-gray-300 rounded-lg border border-gray-200/50 dark:border-slate-700/50 focus:outline-none focus:ring-2 focus:ring-blue-500/30 transition-all"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             style={{ minWidth: 0 }}
@@ -157,7 +157,7 @@ export function LockManager() {
         </div>
         {/* Filter Select */}
         <select
-          className="text-xs px-1 py-0.5 h-6 bg-bolt-elements-background-depth-2 text-bolt-elements-textPrimary rounded border border-bolt-elements-borderColor focus:outline-none"
+          className="text-xs px-2 py-1.5 h-7 bg-gray-50/80 dark:bg-slate-800/80 text-gray-700 dark:text-gray-300 rounded-lg border border-gray-200/50 dark:border-slate-700/50 focus:outline-none focus:ring-2 focus:ring-blue-500/30 transition-all"
           value={filter}
           onChange={(e) => setFilter(e.target.value as any)}
         >
@@ -168,20 +168,20 @@ export function LockManager() {
       </div>
 
       {/* Header Row with Select All */}
-      <div className="flex items-center justify-between px-2 py-1 text-xs text-bolt-elements-textSecondary">
-        <div>
+      <div className="flex items-center justify-between px-3 py-2 text-xs text-gray-600 dark:text-gray-400">
+        <div className="flex items-center">
           <Checkbox
             checked={selectAllCheckedState}
             onCheckedChange={handleSelectAll}
-            className="w-3 h-3 rounded border-bolt-elements-borderColor mr-2"
+            className="w-3 h-3 rounded border-gray-300 dark:border-slate-600 mr-2"
             aria-label="Select all items"
-            disabled={filteredAndSortedItems.length === 0} // Disable if no items to select
+            disabled={filteredAndSortedItems.length === 0}
           />
           <span>All</span>
         </div>
         {selectedItems.size > 0 && (
           <button
-            className="ml-auto px-2 py-0.5 rounded bg-bolt-elements-button-secondary-background hover:bg-bolt-elements-button-secondary-backgroundHover text-bolt-elements-button-secondary-text text-xs flex items-center gap-1"
+            className="ml-auto px-2.5 py-1 rounded-lg bg-blue-50 dark:bg-blue-900/30 hover:bg-blue-100 dark:hover:bg-blue-900/50 text-blue-600 dark:text-blue-400 text-xs flex items-center gap-1 transition-colors"
             onClick={handleUnlockSelected}
             title="Unlock all selected items"
           >
@@ -192,9 +192,9 @@ export function LockManager() {
       </div>
 
       {/* List of locked items */}
-      <div className="flex-1 overflow-auto modern-scrollbar px-1 py-1">
+      <div className="flex-1 overflow-auto modern-scrollbar px-2 py-1">
         {filteredAndSortedItems.length === 0 ? (
-          <div className="flex flex-col items-center justify-center h-full text-bolt-elements-textTertiary text-xs gap-2">
+          <div className="flex flex-col items-center justify-center h-full text-gray-400 dark:text-gray-500 text-xs gap-2">
             <span className="i-ph:lock-open-duotone text-lg opacity-50" />
             <span>No locked items found</span>
           </div>
@@ -204,26 +204,29 @@ export function LockManager() {
               <li
                 key={item.path}
                 className={classNames(
-                  'text-bolt-elements-textTertiary flex items-center gap-2 px-2 py-1 rounded hover:bg-bolt-elements-background-depth-2 transition-colors group',
-                  selectedItems.has(item.path) ? 'bg-bolt-elements-background-depth-2' : '',
+                  'text-gray-500 dark:text-gray-400 flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-colors group',
+                  selectedItems.has(item.path) ? 'bg-blue-50 dark:bg-blue-900/30' : '',
                 )}
               >
                 <Checkbox
                   checked={selectedItems.has(item.path)}
                   onCheckedChange={() => handleSelectItem(item.path)}
-                  className="w-3 h-3 rounded border-bolt-elements-borderColor"
-                  aria-labelledby={`item-label-${item.path}`} // For accessibility
+                  className="w-3 h-3 rounded border-gray-300 dark:border-slate-600"
+                  aria-labelledby={`item-label-${item.path}`}
                 />
                 <span
                   className={classNames(
-                    'shrink-0 text-bolt-elements-textTertiary text-xs',
+                    'shrink-0 text-gray-400 dark:text-gray-500 text-xs',
                     item.type === 'file' ? 'i-ph:file-text-duotone' : 'i-ph:folder-duotone',
                   )}
                 />
-                <span id={`item-label-${item.path}`} className="truncate flex-1 text-xs" title={item.path}>
+                <span
+                  id={`item-label-${item.path}`}
+                  className="truncate flex-1 text-xs text-gray-700 dark:text-gray-300"
+                  title={item.path}
+                >
                   {item.path.replace('/home/project/', '')}
                 </span>
-                {/* ... rest of the item details and buttons ... */}
                 <span
                   className={classNames(
                     'inline-flex items-center px-1 rounded-sm text-xs',
@@ -231,7 +234,7 @@ export function LockManager() {
                   )}
                 ></span>
                 <button
-                  className="flex items-center px-1 py-0.5 text-xs rounded bg-transparent hover:bg-bolt-elements-background-depth-3"
+                  className="flex items-center px-1.5 py-0.5 text-xs rounded-lg bg-transparent hover:bg-gray-100 dark:hover:bg-slate-700 text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
                   onClick={() => {
                     if (item.type === 'file') {
                       workbenchStore.unlockFile(item.path);
@@ -252,7 +255,7 @@ export function LockManager() {
       </div>
 
       {/* Footer */}
-      <div className="px-2 py-1 border-t border-bolt-elements-borderColor bg-bolt-elements-background-depth-2 text-xs text-bolt-elements-textTertiary flex justify-between items-center">
+      <div className="px-3 py-2 border-t border-gray-200/50 dark:border-slate-700/50 bg-gray-50/50 dark:bg-slate-800/50 text-xs text-gray-500 dark:text-gray-400 flex justify-between items-center">
         <div>
           {filteredAndSortedItems.length} item(s) • {selectedItems.size} selected
         </div>

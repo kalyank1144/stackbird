@@ -349,13 +349,29 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
         <div className="flex flex-col lg:flex-row overflow-y-auto w-full h-full">
           <div className={classNames(styles.Chat, 'flex flex-col flex-grow lg:min-w-[var(--chat-min-width)] h-full')}>
             {!chatStarted && (
-              <div id="intro" className="mt-[16vh] max-w-2xl mx-auto text-center px-4 lg:px-0">
-                <h1 className="text-3xl lg:text-6xl font-bold text-bolt-elements-textPrimary mb-4 animate-fade-in">
-                  Where ideas begin
+              <div id="intro" className="mt-[12vh] max-w-2xl mx-auto text-center px-4 lg:px-0">
+                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/30 dark:to-purple-900/30 border border-blue-100 dark:border-blue-800/50 mb-6 animate-fade-in">
+                  <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+                  <span className="text-sm font-medium text-gray-700 dark:text-gray-300">AI-powered development</span>
+                </div>
+                <h1 className="text-4xl lg:text-6xl font-bold mb-4 animate-fade-in">
+                  <span className="text-bolt-elements-textPrimary">Build apps </span>
+                  <span className="bg-gradient-to-r from-blue-600 via-purple-600 to-blue-600 bg-clip-text text-transparent bg-[length:200%_200%] animate-gradient">
+                    in seconds
+                  </span>
                 </h1>
-                <p className="text-md lg:text-xl mb-8 text-bolt-elements-textSecondary animate-fade-in animation-delay-200">
-                  Bring ideas to life in seconds or get help on existing projects.
+                <p className="text-lg lg:text-xl mb-8 text-bolt-elements-textSecondary animate-fade-in animation-delay-200">
+                  Describe what you want to create. Watch AI build it in real-time.
                 </p>
+                <style>{`
+                  @keyframes gradient {
+                    0%, 100% { background-position: 0% 50%; }
+                    50% { background-position: 100% 50%; }
+                  }
+                  .animate-gradient {
+                    animation: gradient 3s ease infinite;
+                  }
+                `}</style>
               </div>
             )}
             <StickToBottom
@@ -508,13 +524,13 @@ function ScrollToBottom() {
   return (
     !isAtBottom && (
       <>
-        <div className="sticky bottom-0 left-0 right-0 bg-gradient-to-t from-bolt-elements-background-depth-1 to-transparent h-20 z-10" />
+        <div className="sticky bottom-0 left-0 right-0 bg-gradient-to-t from-white dark:from-slate-900 to-transparent h-20 z-10" />
         <button
-          className="sticky z-50 bottom-0 left-0 right-0 text-4xl rounded-lg px-1.5 py-0.5 flex items-center justify-center mx-auto gap-2 bg-bolt-elements-background-depth-2 border border-bolt-elements-borderColor text-bolt-elements-textPrimary text-sm"
+          className="sticky z-50 bottom-0 left-0 right-0 rounded-xl px-4 py-2 flex items-center justify-center mx-auto gap-2 bg-white/90 dark:bg-slate-800/90 backdrop-blur-sm border border-gray-200/50 dark:border-slate-700/50 text-gray-700 dark:text-gray-300 text-sm shadow-lg hover:shadow-xl hover:bg-white dark:hover:bg-slate-800 transition-all"
           onClick={() => scrollToBottom()}
         >
           Go to last message
-          <span className="i-ph:arrow-down animate-bounce" />
+          <span className="i-ph:arrow-down animate-bounce text-blue-500" />
         </button>
       </>
     )

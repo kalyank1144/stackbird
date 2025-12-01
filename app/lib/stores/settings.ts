@@ -82,38 +82,31 @@ const fetchConfiguredProviders = async (): Promise<ConfiguredProvider[]> => {
   }
 };
 
+/*
+ * Platform-controlled providers - only these providers are enabled for monetization
+ * Users cannot add their own API keys - all keys are managed server-side
+ */
+const PLATFORM_ENABLED_PROVIDERS = ['Anthropic'];
+
 // Initialize provider settings from both localStorage and server-detected configuration
 const getInitialProviderSettings = (): ProviderSetting => {
   const initialSettings: ProviderSetting = {};
 
-  // Start with default settings
+  // Start with default settings - only enable platform-controlled providers
   PROVIDER_LIST.forEach((provider) => {
     initialSettings[provider.name] = {
       ...provider,
       settings: {
-        // Local providers should be disabled by default
-        enabled: !LOCAL_PROVIDERS.includes(provider.name),
+        // Only enable providers that are platform-controlled (have server-side API keys)
+        enabled: PLATFORM_ENABLED_PROVIDERS.includes(provider.name),
       },
     };
   });
 
-  // Only try to load from localStorage in the browser
-  if (isBrowser) {
-    const savedSettings = localStorage.getItem(PROVIDER_SETTINGS_KEY);
-
-    if (savedSettings) {
-      try {
-        const parsed = JSON.parse(savedSettings);
-        Object.entries(parsed).forEach(([key, value]) => {
-          if (initialSettings[key]) {
-            initialSettings[key].settings = (value as IProviderConfig).settings;
-          }
-        });
-      } catch (error) {
-        console.error('Error parsing saved provider settings:', error);
-      }
-    }
-  }
+  /*
+   * Note: We no longer load from localStorage to prevent users from enabling other providers
+   * All provider settings are controlled by the platform for monetization
+   */
 
   return initialSettings;
 };

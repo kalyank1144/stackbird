@@ -178,7 +178,7 @@ export function Search() {
   };
 
   return (
-    <div className="flex flex-col h-full bg-bolt-elements-background-depth-2">
+    <div className="flex flex-col h-full bg-white/50 dark:bg-slate-900/50">
       {/* Search Bar */}
       <div className="flex items-center py-3 px-3">
         <div className="relative flex-1">
@@ -187,7 +187,7 @@ export function Search() {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search"
-            className="w-full px-2 py-1 rounded-md bg-bolt-elements-background-depth-3 text-bolt-elements-textPrimary placeholder-bolt-elements-textTertiary focus:outline-none transition-all"
+            className="w-full px-3 py-2 rounded-xl bg-gray-50/80 dark:bg-slate-800/80 border border-gray-200/50 dark:border-slate-700/50 text-gray-700 dark:text-gray-300 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500/30 transition-all"
           />
         </div>
       </div>
@@ -195,26 +195,28 @@ export function Search() {
       {/* Results */}
       <div className="flex-1 overflow-auto py-2">
         {isSearching && (
-          <div className="flex items-center justify-center h-32 text-bolt-elements-textTertiary">
-            <div className="i-ph:circle-notch animate-spin mr-2" /> Searching...
+          <div className="flex items-center justify-center h-32 text-gray-500 dark:text-gray-400">
+            <div className="i-ph:circle-notch animate-spin mr-2 text-blue-500" /> Searching...
           </div>
         )}
         {!isSearching && hasSearched && searchResults.length === 0 && searchQuery.trim() !== '' && (
-          <div className="flex items-center justify-center h-32 text-gray-500">No results found.</div>
+          <div className="flex items-center justify-center h-32 text-gray-500 dark:text-gray-400">
+            No results found.
+          </div>
         )}
         {!isSearching &&
           Object.keys(groupedResults).map((file) => (
             <div key={file} className="mb-2">
               <button
-                className="flex gap-2 items-center w-full text-left py-1 px-2 text-bolt-elements-textSecondary bg-transparent hover:bg-bolt-elements-background-depth-3 group"
+                className="flex gap-2 items-center w-full text-left py-1.5 px-2 text-gray-600 dark:text-gray-400 bg-transparent hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-lg mx-1 transition-colors group"
                 onClick={() => setExpandedFiles((prev) => ({ ...prev, [file]: !prev[file] }))}
               >
                 <span
-                  className=" i-ph:caret-down-thin w-3 h-3 text-bolt-elements-textSecondary transition-transform"
+                  className="i-ph:caret-down-thin w-3 h-3 text-gray-400 dark:text-gray-500 transition-transform"
                   style={{ transform: expandedFiles[file] ? 'rotate(180deg)' : undefined }}
                 />
                 <span className="font-normal text-sm">{file.split('/').pop()}</span>
-                <span className="h-5.5 w-5.5 flex items-center justify-center text-xs ml-auto bg-bolt-elements-item-backgroundAccent text-bolt-elements-item-contentAccent rounded-full">
+                <span className="h-5.5 w-5.5 flex items-center justify-center text-xs ml-auto bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400 rounded-full">
                   {groupedResults[file].length}
                 </span>
               </button>
@@ -233,13 +235,13 @@ export function Search() {
                     return (
                       <div
                         key={idx}
-                        className="hover:bg-bolt-elements-background-depth-3 cursor-pointer transition-colors pl-6 py-1"
+                        className="hover:bg-blue-50 dark:hover:bg-blue-900/30 cursor-pointer transition-colors pl-6 py-1.5 rounded-lg mx-1"
                         onClick={() => handleResultClick(match.path, match.lineNumber)}
                       >
-                        <pre className="font-mono text-xs text-bolt-elements-textTertiary truncate">
+                        <pre className="font-mono text-xs text-gray-500 dark:text-gray-400 truncate">
                           {!isStart && <span>...</span>}
                           {previewText.slice(0, matchStart)}
-                          <span className="bg-bolt-elements-item-backgroundAccent text-bolt-elements-item-contentAccent rounded px-1">
+                          <span className="bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400 rounded px-1">
                             {previewText.slice(matchStart, matchEnd)}
                           </span>
                           {previewText.slice(matchEnd)}

@@ -14,33 +14,39 @@ export default class AnthropicProvider extends BaseProvider {
 
   staticModels: ModelInfo[] = [
     /*
-     * Essential fallback models - only the most stable/reliable ones
+     * Claude 3.5 Haiku: 200k context, fast and cost-effective (recommended for testing)
+     * Max output: 8,192 tokens
+     */
+    {
+      name: 'claude-3-5-haiku-20241022',
+      label: 'Claude 3.5 Haiku (Fast & Cheap)',
+      provider: 'Anthropic',
+      maxTokenAllowed: 200000,
+      maxCompletionTokens: 8192,
+    },
+
+    /*
      * Claude 3.5 Sonnet: 200k context, excellent for complex reasoning and coding
+     * Max output: 8,192 tokens (can be extended to 128k with beta header)
      */
     {
       name: 'claude-3-5-sonnet-20241022',
       label: 'Claude 3.5 Sonnet',
       provider: 'Anthropic',
       maxTokenAllowed: 200000,
-      maxCompletionTokens: 128000,
+      maxCompletionTokens: 8192,
     },
 
-    // Claude 3 Haiku: 200k context, fastest and most cost-effective
+    /*
+     * Claude 3 Haiku: 200k context, fastest and most cost-effective (legacy)
+     * Max output: 4,096 tokens only
+     */
     {
       name: 'claude-3-haiku-20240307',
-      label: 'Claude 3 Haiku',
+      label: 'Claude 3 Haiku (Legacy)',
       provider: 'Anthropic',
       maxTokenAllowed: 200000,
-      maxCompletionTokens: 128000,
-    },
-
-    // Claude Opus 4: 200k context, 32k output limit (latest flagship model)
-    {
-      name: 'claude-opus-4-20250514',
-      label: 'Claude 4 Opus',
-      provider: 'Anthropic',
-      maxTokenAllowed: 200000,
-      maxCompletionTokens: 32000,
+      maxCompletionTokens: 4096,
     },
   ];
 

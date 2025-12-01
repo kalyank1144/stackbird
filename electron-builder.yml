@@ -1,5 +1,5 @@
-appId: com.stackblitz.bolt.diy
-productName: Bolt Local
+appId: dev.stackbird.app
+productName: StackBird
 directories:
   buildResources: build
   output: dist
@@ -55,8 +55,8 @@ npmRebuild: false
 
 publish:
   provider: github
-  owner: Derek-X-Wang
-  repo: bolt.local
+  owner: stackbird
+  repo: stackbird
   private: true
   releaseType: release
 

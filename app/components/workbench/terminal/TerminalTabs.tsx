@@ -131,8 +131,8 @@ export const TerminalTabs = memo(() => {
       }}
     >
       <div className="h-full">
-        <div className="bg-bolt-elements-terminals-background h-full flex flex-col">
-          <div className="flex items-center bg-bolt-elements-background-depth-2 border-y border-bolt-elements-borderColor gap-1.5 min-h-[34px] p-2">
+        <div className="bg-slate-900 h-full flex flex-col">
+          <div className="flex items-center bg-slate-800/80 backdrop-blur-sm border-y border-slate-700/50 gap-1.5 min-h-[34px] p-2">
             {Array.from({ length: terminalCount + 1 }, (_, index) => {
               const isActive = activeTerminal === index;
 
@@ -142,29 +142,26 @@ export const TerminalTabs = memo(() => {
                     <button
                       key={index}
                       className={classNames(
-                        'flex items-center text-sm cursor-pointer gap-1.5 px-3 py-2 h-full whitespace-nowrap rounded-full',
+                        'flex items-center text-sm cursor-pointer gap-1.5 px-3 py-2 h-full whitespace-nowrap rounded-xl transition-colors',
                         {
-                          'bg-bolt-elements-terminals-buttonBackground text-bolt-elements-textSecondary hover:text-bolt-elements-textPrimary':
-                            isActive,
-                          'bg-bolt-elements-background-depth-2 text-bolt-elements-textSecondary hover:bg-bolt-elements-terminals-buttonBackground':
-                            !isActive,
+                          'bg-blue-500/20 text-blue-400': isActive,
+                          'bg-transparent text-gray-400 hover:bg-slate-700/50 hover:text-gray-300': !isActive,
                         },
                       )}
                       onClick={() => setActiveTerminal(index)}
                     >
                       <div className="i-ph:terminal-window-duotone text-lg" />
-                      Bolt Terminal
+                      StackBird Terminal
                     </button>
                   ) : (
                     <React.Fragment>
                       <button
                         key={index}
                         className={classNames(
-                          'flex items-center text-sm cursor-pointer gap-1.5 px-3 py-2 h-full whitespace-nowrap rounded-full',
+                          'flex items-center text-sm cursor-pointer gap-1.5 px-3 py-2 h-full whitespace-nowrap rounded-xl transition-colors',
                           {
-                            'bg-bolt-elements-terminals-buttonBackground text-bolt-elements-textPrimary': isActive,
-                            'bg-bolt-elements-background-depth-2 text-bolt-elements-textSecondary hover:bg-bolt-elements-terminals-buttonBackground':
-                              !isActive,
+                            'bg-blue-500/20 text-blue-400': isActive,
+                            'bg-transparent text-gray-400 hover:bg-slate-700/50 hover:text-gray-300': !isActive,
                           },
                         )}
                         onClick={() => setActiveTerminal(index)}
@@ -172,7 +169,7 @@ export const TerminalTabs = memo(() => {
                         <div className="i-ph:terminal-window-duotone text-lg" />
                         Terminal {terminalCount > 1 && index}
                         <button
-                          className="bg-transparent text-bolt-elements-textTertiary hover:text-bolt-elements-textPrimary hover:bg-transparent rounded"
+                          className="bg-transparent text-gray-500 hover:text-gray-300 hover:bg-transparent rounded"
                           onClick={(e) => {
                             e.stopPropagation();
                             closeTerminal(index);

@@ -49,7 +49,7 @@ export const PortDropdown = memo(
       <div className="relative z-port-dropdown" ref={dropdownRef}>
         {/* Display the active port if available, otherwise show the plug icon */}
         <button
-          className="flex items-center group-focus-within:text-bolt-elements-preview-addressBar-text bg-white group-focus-within:bg-bolt-elements-preview-addressBar-background dark:bg-bolt-elements-preview-addressBar-backgroundHover rounded-full px-2 py-1 gap-1.5"
+          className="flex items-center bg-gray-100/80 dark:bg-slate-800/80 hover:bg-blue-50 dark:hover:bg-blue-900/30 text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 rounded-xl px-2 py-1 gap-1.5 transition-colors"
           onClick={() => setIsDropdownOpen(!isDropdownOpen)}
         >
           <span className="i-ph:plug text-base"></span>
@@ -58,14 +58,14 @@ export const PortDropdown = memo(
           ) : null}
         </button>
         {isDropdownOpen && (
-          <div className="absolute left-0 mt-2 bg-bolt-elements-background-depth-2 border border-bolt-elements-borderColor rounded shadow-sm min-w-[140px] dropdown-animation">
-            <div className="px-4 py-2 border-b border-bolt-elements-borderColor text-sm font-semibold text-bolt-elements-textPrimary">
+          <div className="absolute left-0 mt-2 bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border border-gray-200/50 dark:border-slate-700/50 rounded-xl shadow-2xl min-w-[140px] dropdown-animation">
+            <div className="px-4 py-2 border-b border-gray-200/50 dark:border-slate-700/50 text-sm font-semibold text-gray-700 dark:text-gray-300">
               Ports
             </div>
             {sortedPreviews.map((preview) => (
               <div
                 key={preview.port}
-                className="flex items-center px-4 py-2 cursor-pointer hover:bg-bolt-elements-item-backgroundActive"
+                className="flex items-center px-4 py-2 cursor-pointer hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-colors"
                 onClick={() => {
                   setActivePreviewIndex(preview.index);
                   setIsDropdownOpen(false);
@@ -75,8 +75,8 @@ export const PortDropdown = memo(
                 <span
                   className={
                     activePreviewIndex === preview.index
-                      ? 'text-bolt-elements-item-contentAccent'
-                      : 'text-bolt-elements-item-contentDefault group-hover:text-bolt-elements-item-contentActive'
+                      ? 'text-blue-500 font-medium'
+                      : 'text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400'
                   }
                 >
                   {preview.port}

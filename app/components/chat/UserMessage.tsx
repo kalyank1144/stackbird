@@ -43,26 +43,26 @@ export function UserMessage({ content, parts }: UserMessageProps) {
               <img
                 src={profile.avatar}
                 alt={profile?.username || 'User'}
-                className="w-[25px] h-[25px] object-cover rounded-full"
+                className="w-[28px] h-[28px] object-cover rounded-full ring-2 ring-blue-100 dark:ring-blue-900/50"
                 loading="eager"
                 decoding="sync"
               />
-              <span className="text-bolt-elements-textPrimary text-sm">
+              <span className="text-gray-900 dark:text-white text-sm font-medium">
                 {profile?.username ? profile.username : ''}
               </span>
             </div>
           ) : (
-            <div className="i-ph:user-fill text-accent-500 text-2xl" />
+            <div className="i-ph:user-fill text-blue-500 text-2xl" />
           )}
         </div>
-        <div className="flex flex-col gap-4 bg-accent-500/10 backdrop-blur-sm p-3 py-3 w-auto rounded-lg mr-auto">
+        <div className="flex flex-col gap-4 bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 backdrop-blur-sm p-4 w-auto rounded-2xl mr-auto border border-blue-100/50 dark:border-blue-800/30 shadow-sm">
           {textContent && <Markdown html>{textContent}</Markdown>}
           {images.map((item, index) => (
             <img
               key={index}
               src={`data:${item.mimeType};base64,${item.data}`}
               alt={`Image ${index + 1}`}
-              className="max-w-full h-auto rounded-lg"
+              className="max-w-full h-auto rounded-xl"
               style={{ maxHeight: '512px', objectFit: 'contain' }}
             />
           ))}
@@ -74,16 +74,16 @@ export function UserMessage({ content, parts }: UserMessageProps) {
   const textContent = stripMetadata(content);
 
   return (
-    <div className="flex flex-col bg-accent-500/10 backdrop-blur-sm px-5 p-3.5 w-auto rounded-lg ml-auto">
+    <div className="flex flex-col bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 backdrop-blur-sm px-5 p-4 w-auto rounded-2xl ml-auto border border-blue-100/50 dark:border-blue-800/30 shadow-sm">
       <div className="flex gap-3.5 mb-4">
         {images.map((item, index) => (
-          <div className="relative flex rounded-lg border border-bolt-elements-borderColor overflow-hidden">
+          <div className="relative flex rounded-xl border border-blue-200/50 dark:border-blue-700/50 overflow-hidden shadow-sm">
             <div className="h-16 w-16 bg-transparent outline-none">
               <img
                 key={index}
                 src={`data:${item.mimeType};base64,${item.data}`}
                 alt={`Image ${index + 1}`}
-                className="h-full w-full rounded-lg"
+                className="h-full w-full rounded-xl"
                 style={{ objectFit: 'fill' }}
               />
             </div>

@@ -1,0 +1,178 @@
+/* StackBird Design System - Living Data Aesthetic */
+
+/* ============================================
+   1. COLOR TOKENS
+   ============================================ */
+
+:root {
+  /* Primary Colors */
+  --sb-blue-50: #EFF6FF;
+  --sb-blue-100: #DBEAFE;
+  --sb-blue-200: #BFDBFE;
+  --sb-blue-300: #93C5FD;
+  --sb-blue-400: #60A5FA;
+  --sb-blue-500: #3B82F6;
+  --sb-blue-600: #2563EB;
+  --sb-blue-700: #1D4ED8;
+
+  --sb-purple-50: #FAF5FF;
+  --sb-purple-100: #F3E8FF;
+  --sb-purple-200: #E9D5FF;
+  --sb-purple-300: #D8B4FE;
+  --sb-purple-400: #C084FC;
+  --sb-purple-500: #A855F7;
+  --sb-purple-600: #9333EA;
+  --sb-purple-700: #7E22CE;
+
+  --sb-slate-50: #F8FAFC;
+  --sb-slate-100: #F1F5F9;
+  --sb-slate-200: #E2E8F0;
+  --sb-slate-300: #CBD5E1;
+  --sb-slate-400: #94A3B8;
+  --sb-slate-500: #64748B;
+  --sb-slate-600: #475569;
+  --sb-slate-700: #334155;
+  --sb-slate-800: #1E293B;
+  --sb-slate-900: #0F172A;
+
+  /* Surfaces */
+  --sb-bg-primary: #FAFBFC;
+  --sb-bg-secondary: #FFFFFF;
+  --sb-glass-bg: rgba(255, 255, 255, 0.7);
+  --sb-glass-border: rgba(255, 255, 255, 0.5);
+
+  /* Text */
+  --sb-text-primary: #111827;
+  --sb-text-secondary: #374151;
+  --sb-text-muted: #9CA3AF;
+
+  /* Shadows */
+  --sb-shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --sb-shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+  --sb-shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+  --sb-shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1);
+  --sb-shadow-soft: 0 8px 30px rgb(0 0 0 / 0.04);
+  --sb-shadow-glass: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
+
+  /* Transitions */
+  --sb-transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  --sb-transition-normal: 300ms cubic-bezier(0.4, 0, 0.2, 1);
+  --sb-transition-slow: 500ms cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* Border Radius */
+  --sb-radius-sm: 0.375rem;
+  --sb-radius-md: 0.5rem;
+  --sb-radius-lg: 0.75rem;
+  --sb-radius-xl: 1rem;
+  --sb-radius-2xl: 1.5rem;
+  --sb-radius-full: 9999px;
+
+  /* Spacing */
+  --sb-header-height: 64px;
+}
+
+/* ============================================
+   2. GLASS MORPHISM UTILITIES
+   ============================================ */
+
+.glass {
+  background: var(--sb-glass-bg);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--sb-glass-border);
+}
+
+.glass-card {
+  background: var(--sb-glass-bg);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--sb-glass-border);
+  box-shadow: var(--sb-shadow-glass);
+}
+
+.content-card {
+  background: var(--sb-bg-secondary);
+  border: 1px solid var(--sb-slate-100);
+  box-shadow: var(--sb-shadow-soft);
+}
+
+/* ============================================
+   3. TYPOGRAPHY
+   ============================================ */
+
+.text-gradient {
+  background: linear-gradient(135deg, var(--sb-blue-600), var(--sb-purple-600), var(--sb-blue-600));
+  background-size: 200% 200%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: gradient-shift 3s ease infinite;
+}
+
+@keyframes gradient-shift {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+/* ============================================
+   4. BUTTON STYLES
+   ============================================ */
+
+.btn-primary {
+  background: var(--sb-slate-900);
+  color: white;
+  border-radius: var(--sb-radius-full);
+  padding: 0.75rem 1.5rem;
+  font-weight: 500;
+  transition: all var(--sb-transition-fast);
+  border: none;
+  cursor: pointer;
+}
+
+.btn-primary:hover {
+  background: black;
+  transform: translateY(-2px);
+  box-shadow: var(--sb-shadow-lg);
+}
+
+.btn-secondary {
+  background: white;
+  color: var(--sb-text-secondary);
+  border: 1px solid var(--sb-slate-200);
+  border-radius: var(--sb-radius-full);
+  padding: 0.75rem 1.5rem;
+  font-weight: 500;
+  transition: all var(--sb-transition-fast);
+  cursor: pointer;
+}
+
+.btn-secondary:hover {
+  background: var(--sb-slate-50);
+  transform: translateY(-1px);
+}
+
+/* ============================================
+   5. ANIMATIONS
+   ============================================ */
+
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fade-in-up 0.5s ease-out forwards;
+}
+
+.animate-delay-100 { animation-delay: 100ms; }
+.animate-delay-200 { animation-delay: 200ms; }
+.animate-delay-300 { animation-delay: 300ms; }
+.animate-delay-400 { animation-delay: 400ms; }
+.animate-delay-500 { animation-delay: 500ms; }
+

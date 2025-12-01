@@ -15,24 +15,24 @@ export function HeaderActionButtons({ chatStarted: _chatStarted }: HeaderActionB
   const shouldShowButtons = activePreview;
 
   return (
-    <div className="flex items-center gap-1">
+    <div className="flex items-center gap-2">
       {/* Deploy Button */}
       {shouldShowButtons && <DeployButton />}
 
       {/* Debug Tools */}
       {shouldShowButtons && (
-        <div className="flex border border-bolt-elements-borderColor rounded-md overflow-hidden text-sm">
+        <div className="flex border border-gray-200/50 dark:border-slate-700/50 rounded-xl overflow-hidden text-sm shadow-sm">
           <button
             onClick={() =>
               window.open('https://github.com/stackblitz-labs/bolt.diy/issues/new?template=bug_report.yml', '_blank')
             }
-            className="rounded-l-md items-center justify-center [&:is(:disabled,.disabled)]:cursor-not-allowed [&:is(:disabled,.disabled)]:opacity-60 px-3 py-1.5 text-xs bg-accent-500 text-white hover:text-bolt-elements-item-contentAccent [&:not(:disabled,.disabled)]:hover:bg-bolt-elements-button-primary-backgroundHover outline-accent-500 flex gap-1.5"
+            className="items-center justify-center [&:is(:disabled,.disabled)]:cursor-not-allowed [&:is(:disabled,.disabled)]:opacity-60 px-3 py-2 text-xs bg-gradient-to-r from-blue-500 to-purple-500 text-white hover:from-blue-600 hover:to-purple-600 flex gap-1.5 transition-all"
             title="Report Bug"
           >
             <div className="i-ph:bug" />
             <span>Report Bug</span>
           </button>
-          <div className="w-px bg-bolt-elements-borderColor" />
+          <div className="w-px bg-white/20" />
           <button
             onClick={async () => {
               try {
@@ -42,7 +42,7 @@ export function HeaderActionButtons({ chatStarted: _chatStarted }: HeaderActionB
                 console.error('Failed to download debug log:', error);
               }
             }}
-            className="rounded-r-md items-center justify-center [&:is(:disabled,.disabled)]:cursor-not-allowed [&:is(:disabled,.disabled)]:opacity-60 px-3 py-1.5 text-xs bg-accent-500 text-white hover:text-bolt-elements-item-contentAccent [&:not(:disabled,.disabled)]:hover:bg-bolt-elements-button-primary-backgroundHover outline-accent-500 flex gap-1.5"
+            className="items-center justify-center [&:is(:disabled,.disabled)]:cursor-not-allowed [&:is(:disabled,.disabled)]:opacity-60 px-3 py-2 text-xs bg-gradient-to-r from-purple-500 to-blue-500 text-white hover:from-purple-600 hover:to-blue-600 flex gap-1.5 transition-all"
             title="Download Debug Log"
           >
             <div className="i-ph:download" />

@@ -24,7 +24,7 @@ export default function ChatAlert({ alert, clearAlert, postMessage }: Props) {
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: -20 }}
         transition={{ duration: 0.3 }}
-        className={`rounded-lg border border-bolt-elements-borderColor bg-bolt-elements-background-depth-2 p-4 mb-2`}
+        className={`rounded-xl border border-red-200/50 dark:border-red-800/50 bg-red-50/80 dark:bg-red-900/20 backdrop-blur-sm p-4 mb-2`}
       >
         <div className="flex items-start">
           {/* Icon */}
@@ -34,7 +34,7 @@ export default function ChatAlert({ alert, clearAlert, postMessage }: Props) {
             animate={{ scale: 1 }}
             transition={{ delay: 0.2 }}
           >
-            <div className={`i-ph:warning-duotone text-xl text-bolt-elements-button-danger-text`}></div>
+            <div className={`i-ph:warning-duotone text-xl text-red-500`}></div>
           </motion.div>
           {/* Content */}
           <div className="ml-3 flex-1">
@@ -42,7 +42,7 @@ export default function ChatAlert({ alert, clearAlert, postMessage }: Props) {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.1 }}
-              className={`text-sm font-medium text-bolt-elements-textPrimary`}
+              className={`text-sm font-medium text-gray-900 dark:text-white`}
             >
               {title}
             </motion.h3>
@@ -50,11 +50,11 @@ export default function ChatAlert({ alert, clearAlert, postMessage }: Props) {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.2 }}
-              className={`mt-2 text-sm text-bolt-elements-textSecondary`}
+              className={`mt-2 text-sm text-gray-600 dark:text-gray-400`}
             >
               <p>{message}</p>
               {description && (
-                <div className="text-xs text-bolt-elements-textSecondary p-2 bg-bolt-elements-background-depth-3 rounded mt-4 mb-4">
+                <div className="text-xs text-red-600 dark:text-red-400 p-2 bg-red-100/50 dark:bg-red-900/30 rounded-lg mt-4 mb-4">
                   Error: {description}
                 </div>
               )}
@@ -67,7 +67,7 @@ export default function ChatAlert({ alert, clearAlert, postMessage }: Props) {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3 }}
             >
-              <div className={classNames(' flex gap-2')}>
+              <div className={classNames('flex gap-2')}>
                 <button
                   onClick={() =>
                     postMessage(
@@ -75,11 +75,11 @@ export default function ChatAlert({ alert, clearAlert, postMessage }: Props) {
                     )
                   }
                   className={classNames(
-                    `px-2 py-1.5 rounded-md text-sm font-medium`,
-                    'bg-bolt-elements-button-primary-background',
-                    'hover:bg-bolt-elements-button-primary-backgroundHover',
-                    'focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-bolt-elements-button-danger-background',
-                    'text-bolt-elements-button-primary-text',
+                    `px-3 py-1.5 rounded-xl text-sm font-medium`,
+                    'bg-gradient-to-r from-blue-500 to-purple-500',
+                    'hover:from-blue-600 hover:to-purple-600',
+                    'focus:outline-none focus:ring-2 focus:ring-blue-500/30',
+                    'text-white shadow-md hover:shadow-lg transition-all',
                     'flex items-center gap-1.5',
                   )}
                 >
@@ -89,11 +89,11 @@ export default function ChatAlert({ alert, clearAlert, postMessage }: Props) {
                 <button
                   onClick={clearAlert}
                   className={classNames(
-                    `px-2 py-1.5 rounded-md text-sm font-medium`,
-                    'bg-bolt-elements-button-secondary-background',
-                    'hover:bg-bolt-elements-button-secondary-backgroundHover',
-                    'focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-bolt-elements-button-secondary-background',
-                    'text-bolt-elements-button-secondary-text',
+                    `px-3 py-1.5 rounded-xl text-sm font-medium`,
+                    'bg-gray-100 dark:bg-slate-800',
+                    'hover:bg-gray-200 dark:hover:bg-slate-700',
+                    'focus:outline-none focus:ring-2 focus:ring-gray-500/30',
+                    'text-gray-700 dark:text-gray-300 transition-all',
                   )}
                 >
                   Dismiss

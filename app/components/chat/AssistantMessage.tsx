@@ -105,7 +105,7 @@ export const AssistantMessage = memo(
     return (
       <div className="overflow-hidden w-full">
         <>
-          <div className=" flex gap-2 items-center text-sm text-bolt-elements-textSecondary mb-2">
+          <div className="flex gap-2 items-center text-sm text-gray-500 dark:text-gray-400 mb-3">
             {(codeContext || chatSummary) && (
               <Popover side="right" align="start" trigger={<div className="i-ph:info" />}>
                 {chatSummary && (
@@ -158,7 +158,7 @@ export const AssistantMessage = memo(
                       <button
                         onClick={() => onRewind(messageId)}
                         key="i-ph:arrow-u-up-left"
-                        className="i-ph:arrow-u-up-left text-xl text-bolt-elements-textSecondary hover:text-bolt-elements-textPrimary transition-colors"
+                        className="i-ph:arrow-u-up-left text-xl text-gray-400 hover:text-blue-500 transition-colors"
                       />
                     </WithTooltip>
                   )}
@@ -167,7 +167,7 @@ export const AssistantMessage = memo(
                       <button
                         onClick={() => onFork(messageId)}
                         key="i-ph:git-fork"
-                        className="i-ph:git-fork text-xl text-bolt-elements-textSecondary hover:text-bolt-elements-textPrimary transition-colors"
+                        className="i-ph:git-fork text-xl text-gray-400 hover:text-blue-500 transition-colors"
                       />
                     </WithTooltip>
                   )}

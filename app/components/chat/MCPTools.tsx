@@ -55,9 +55,9 @@ export function McpTools() {
           className="transition-all disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {!isInitialized ? (
-            <div className="i-svg-spinners:90-ring-with-bg text-bolt-elements-loader-progress text-xl animate-spin"></div>
+            <div className="i-svg-spinners:90-ring-with-bg text-sb-loader-progress text-xl animate-spin"></div>
           ) : (
-            <div className="i-bolt:mcp text-xl"></div>
+            <div className="i-sb:mcp text-xl"></div>
           )}
         </IconButton>
       </div>
@@ -67,7 +67,7 @@ export function McpTools() {
           <Dialog className="max-w-4xl w-full p-6">
             <div className="space-y-4 max-h-[80vh] overflow-y-auto pr-2">
               <DialogTitle>
-                <div className="i-bolt:mcp text-xl"></div>
+                <div className="i-sb:mcp text-xl"></div>
                 MCP tools
               </DialogTitle>
 

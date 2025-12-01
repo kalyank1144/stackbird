@@ -1,4 +1,12 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16">
-  <rect width="16" height="16" rx="2" fill="#8A5FFF" />
-  <path d="M7.398 9.091h-3.58L10.364 2 8.602 6.909h3.58L5.636 14l1.762-4.909Z" fill="#fff" />
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#3B82F6"/>
+      <stop offset="100%" stop-color="#9333EA"/>
+    </linearGradient>
+  </defs>
+  <rect width="16" height="16" rx="3" fill="url(#bg)"/>
+  <!-- Stylized Bird -->
+  <path d="M4 9.5C4 7 6 5 8.5 5C10 5 11.5 6 12 7.5L10 8.5L12 10C11 11.5 9.5 12 8 12C6 12 4 11 4 9.5Z" fill="#fff" opacity="0.95"/>
+  <circle cx="9.5" cy="7" r="0.8" fill="url(#bg)"/>
 </svg>

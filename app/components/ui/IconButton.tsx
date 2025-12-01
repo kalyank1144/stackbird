@@ -46,7 +46,7 @@ export const IconButton = memo(
         <button
           ref={ref}
           className={classNames(
-            'flex items-center text-bolt-elements-item-contentDefault bg-transparent enabled:hover:text-bolt-elements-item-contentActive rounded-md p-1 enabled:hover:bg-bolt-elements-item-backgroundActive disabled:cursor-not-allowed focus:outline-none',
+            'flex items-center text-gray-500 dark:text-gray-400 bg-transparent enabled:hover:text-blue-600 dark:enabled:hover:text-blue-400 rounded-xl p-1.5 enabled:hover:bg-blue-50 dark:enabled:hover:bg-blue-900/30 disabled:cursor-not-allowed focus:outline-none transition-all duration-200',
             {
               [classNames('opacity-30', disabledClassName)]: disabled,
             },

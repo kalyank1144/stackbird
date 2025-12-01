@@ -331,20 +331,24 @@ export const Menu = () => {
         variants={menuVariants}
         style={{ width: '340px' }}
         className={classNames(
-          'flex selection-accent flex-col side-menu fixed top-0 h-full rounded-r-2xl',
-          'bg-white dark:bg-gray-950 border-r border-bolt-elements-borderColor',
-          'shadow-sm text-sm',
+          'flex selection-accent flex-col side-menu fixed top-0 h-full rounded-r-3xl',
+          'bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border-r border-white/20 dark:border-slate-700/50',
+          'shadow-[0_8px_32px_rgba(0,0,0,0.12)] text-sm',
           isSettingsOpen ? 'z-40' : 'z-sidebar',
         )}
       >
-        <div className="h-12 flex items-center justify-between px-4 border-b border-gray-100 dark:border-gray-800/50 bg-gray-50/50 dark:bg-gray-900/50 rounded-tr-2xl">
-          <div className="text-gray-900 dark:text-white font-medium"></div>
+        <div className="h-14 flex items-center justify-between px-4 border-b border-gray-100/50 dark:border-slate-800/50 bg-gradient-to-r from-blue-50/50 to-purple-50/50 dark:from-blue-900/20 dark:to-purple-900/20 rounded-tr-3xl">
+          <div className="flex items-center gap-2">
+            <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
+              <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+              </svg>
+            </div>
+            <span className="font-bold text-gray-900 dark:text-white">StackBird</span>
+          </div>
           <div className="flex items-center gap-3">
             <HelpButton onClick={() => window.open('https://stackblitz-labs.github.io/bolt.diy/', '_blank')} />
-            <span className="font-medium text-sm text-gray-900 dark:text-white truncate">
-              {profile?.username || 'Guest User'}
-            </span>
-            <div className="flex items-center justify-center w-[32px] h-[32px] overflow-hidden bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-500 rounded-full shrink-0">
+            <div className="flex items-center justify-center w-[32px] h-[32px] overflow-hidden bg-gradient-to-br from-blue-100 to-purple-100 dark:from-blue-900/50 dark:to-purple-900/50 text-blue-600 dark:text-blue-400 rounded-full shrink-0 border border-blue-200/50 dark:border-blue-700/50">
               {profile?.avatar ? (
                 <img
                   src={profile.avatar}
@@ -364,8 +368,8 @@ export const Menu = () => {
           <div className="p-4 space-y-3">
             <div className="flex gap-2">
               <a
-                href="/"
-                className="flex-1 flex gap-2 items-center bg-purple-50 dark:bg-purple-500/10 text-purple-700 dark:text-purple-300 hover:bg-purple-100 dark:hover:bg-purple-500/20 rounded-lg px-4 py-2 transition-colors"
+                href="/app"
+                className="flex-1 flex gap-2 items-center bg-gradient-to-r from-blue-500 to-purple-500 text-white hover:from-blue-600 hover:to-purple-600 rounded-xl px-4 py-2.5 transition-all shadow-md hover:shadow-lg hover:-translate-y-0.5"
               >
                 <span className="inline-block i-ph:plus-circle h-4 w-4" />
                 <span className="text-sm font-medium">Start new chat</span>
@@ -373,10 +377,10 @@ export const Menu = () => {
               <button
                 onClick={toggleSelectionMode}
                 className={classNames(
-                  'flex gap-1 items-center rounded-lg px-3 py-2 transition-colors',
+                  'flex gap-1 items-center rounded-xl px-3 py-2.5 transition-all',
                   selectionMode
-                    ? 'bg-purple-600 dark:bg-purple-500 text-white border border-purple-700 dark:border-purple-600'
-                    : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700',
+                    ? 'bg-gradient-to-r from-blue-500 to-purple-500 text-white shadow-md'
+                    : 'bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-slate-700 border border-gray-200/50 dark:border-slate-700/50',
                 )}
                 aria-label={selectionMode ? 'Exit selection mode' : 'Enter selection mode'}
               >
@@ -388,7 +392,7 @@ export const Menu = () => {
                 <span className="i-ph:magnifying-glass h-4 w-4 text-gray-400 dark:text-gray-500" />
               </div>
               <input
-                className="w-full bg-gray-50 dark:bg-gray-900 relative pl-9 pr-3 py-2 rounded-lg focus:outline-none focus:ring-1 focus:ring-purple-500/50 text-sm text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-500 border border-gray-200 dark:border-gray-800"
+                className="w-full bg-gray-50/80 dark:bg-slate-800/50 relative pl-9 pr-3 py-2.5 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/30 text-sm text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-500 border border-gray-200/50 dark:border-slate-700/50 transition-all"
                 type="search"
                 placeholder="Search chats..."
                 onChange={handleSearchChange}
@@ -397,7 +401,7 @@ export const Menu = () => {
             </div>
           </div>
           <div className="flex items-center justify-between text-sm px-4 py-2">
-            <div className="font-medium text-gray-600 dark:text-gray-400">Your Chats</div>
+            <div className="font-medium text-blue-600 dark:text-blue-400">Your Chats</div>
             {selectionMode && (
               <div className="flex items-center gap-2">
                 <Button variant="ghost" size="sm" onClick={selectAll}>
@@ -423,10 +427,10 @@ export const Menu = () => {
             <DialogRoot open={dialogContent !== null}>
               {binDates(filteredList).map(({ category, items }) => (
                 <div key={category} className="mt-2 first:mt-0 space-y-1">
-                  <div className="text-xs font-medium text-gray-500 dark:text-gray-400 sticky top-0 z-1 bg-white dark:bg-gray-950 px-4 py-1">
+                  <div className="text-xs font-medium text-blue-500 dark:text-blue-400 sticky top-0 z-1 bg-white/95 dark:bg-slate-900/95 backdrop-blur-sm px-4 py-1.5 rounded-lg">
                     {category}
                   </div>
-                  <div className="space-y-0.5 pr-1">
+                  <div className="space-y-1 pr-1">
                     {items.map((item) => (
                       <HistoryItem
                         key={item.id}

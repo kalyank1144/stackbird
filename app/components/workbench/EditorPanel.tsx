@@ -84,16 +84,21 @@ export const EditorPanel = memo(
       <PanelGroup direction="vertical">
         <Panel defaultSize={showTerminal ? DEFAULT_EDITOR_SIZE : 100} minSize={20}>
           <PanelGroup direction="horizontal">
-            <Panel defaultSize={20} minSize={15} collapsible className="border-r border-bolt-elements-borderColor">
-              <div className="h-full">
+            <Panel
+              defaultSize={20}
+              minSize={15}
+              collapsible
+              className="border-r border-gray-100/50 dark:border-slate-800/50"
+            >
+              <div className="h-full bg-gray-50/50 dark:bg-slate-900/50">
                 <Tabs.Root defaultValue="files" className="flex flex-col h-full">
-                  <PanelHeader className="w-full text-sm font-medium text-bolt-elements-textSecondary px-1">
+                  <PanelHeader className="w-full text-sm font-medium text-gray-500 dark:text-gray-400 px-2">
                     <div className="h-full flex-shrink-0 flex items-center justify-between w-full">
-                      <Tabs.List className="h-full flex-shrink-0 flex items-center">
+                      <Tabs.List className="h-full flex-shrink-0 flex items-center gap-1">
                         <Tabs.Trigger
                           value="files"
                           className={classNames(
-                            'h-full bg-transparent hover:bg-bolt-elements-background-depth-3 py-0.5 px-2 rounded-lg text-sm font-medium text-bolt-elements-textTertiary hover:text-bolt-elements-textPrimary data-[state=active]:text-bolt-elements-textPrimary',
+                            'h-full bg-transparent hover:bg-blue-50 dark:hover:bg-blue-900/30 py-1 px-3 rounded-xl text-sm font-medium text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 data-[state=active]:text-blue-600 dark:data-[state=active]:text-blue-400 data-[state=active]:bg-blue-50 dark:data-[state=active]:bg-blue-900/30 transition-colors',
                           )}
                         >
                           Files
@@ -101,7 +106,7 @@ export const EditorPanel = memo(
                         <Tabs.Trigger
                           value="search"
                           className={classNames(
-                            'h-full bg-transparent hover:bg-bolt-elements-background-depth-3 py-0.5 px-2 rounded-lg text-sm font-medium text-bolt-elements-textTertiary hover:text-bolt-elements-textPrimary data-[state=active]:text-bolt-elements-textPrimary',
+                            'h-full bg-transparent hover:bg-blue-50 dark:hover:bg-blue-900/30 py-1 px-3 rounded-xl text-sm font-medium text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 data-[state=active]:text-blue-600 dark:data-[state=active]:text-blue-400 data-[state=active]:bg-blue-50 dark:data-[state=active]:bg-blue-900/30 transition-colors',
                           )}
                         >
                           Search
@@ -109,7 +114,7 @@ export const EditorPanel = memo(
                         <Tabs.Trigger
                           value="locks"
                           className={classNames(
-                            'h-full bg-transparent hover:bg-bolt-elements-background-depth-3 py-0.5 px-2 rounded-lg text-sm font-medium text-bolt-elements-textTertiary hover:text-bolt-elements-textPrimary data-[state=active]:text-bolt-elements-textPrimary',
+                            'h-full bg-transparent hover:bg-blue-50 dark:hover:bg-blue-900/30 py-1 px-3 rounded-xl text-sm font-medium text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 data-[state=active]:text-blue-600 dark:data-[state=active]:text-blue-400 data-[state=active]:bg-blue-50 dark:data-[state=active]:bg-blue-900/30 transition-colors',
                           )}
                         >
                           Locks

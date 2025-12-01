@@ -37,17 +37,17 @@ export default function ProgressCompilation({ data }: { data?: ProgressAnnotatio
     <AnimatePresence>
       <div
         className={classNames(
-          'bg-bolt-elements-background-depth-2',
-          'border border-bolt-elements-borderColor',
-          'shadow-lg rounded-lg  relative w-full max-w-chat mx-auto z-prompt',
-          'p-1',
+          'bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl',
+          'border border-gray-200/50 dark:border-slate-700/50',
+          'shadow-lg rounded-xl relative w-full max-w-chat mx-auto z-prompt',
+          'p-1.5',
         )}
       >
         <div
           className={classNames(
-            'bg-bolt-elements-item-backgroundAccent',
-            'p-1 rounded-lg text-bolt-elements-item-contentAccent',
-            'flex ',
+            'bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/30 dark:to-purple-900/30',
+            'p-2 rounded-xl text-blue-600 dark:text-blue-400',
+            'flex',
           )}
         >
           <div className="flex-1">
@@ -74,7 +74,7 @@ export default function ProgressCompilation({ data }: { data?: ProgressAnnotatio
             animate={{ width: 'auto' }}
             exit={{ width: 0 }}
             transition={{ duration: 0.15, ease: cubicEasingFn }}
-            className=" p-1 rounded-lg bg-bolt-elements-item-backgroundAccent hover:bg-bolt-elements-artifacts-backgroundHover"
+            className="p-1.5 rounded-xl hover:bg-blue-100 dark:hover:bg-blue-900/50 transition-colors"
             onClick={() => setExpanded((v) => !v)}
           >
             <div className={expanded ? 'i-ph:caret-up-bold' : 'i-ph:caret-down-bold'}></div>
@@ -88,21 +88,20 @@ export default function ProgressCompilation({ data }: { data?: ProgressAnnotatio
 const ProgressItem = ({ progress }: { progress: ProgressAnnotation }) => {
   return (
     <motion.div
-      className={classNames('flex text-sm gap-3')}
+      className={classNames('flex text-sm gap-3 text-gray-700 dark:text-gray-300')}
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.15 }}
     >
-      <div className="flex items-center gap-1.5 ">
+      <div className="flex items-center gap-1.5">
         <div>
           {progress.status === 'in-progress' ? (
-            <div className="i-svg-spinners:90-ring-with-bg"></div>
+            <div className="i-svg-spinners:90-ring-with-bg text-blue-500"></div>
           ) : progress.status === 'complete' ? (
-            <div className="i-ph:check"></div>
+            <div className="i-ph:check text-green-500"></div>
           ) : null}
         </div>
-        {/* {x.label} */}
       </div>
       {progress.message}
     </motion.div>

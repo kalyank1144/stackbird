@@ -90,9 +90,9 @@ export const FileBreadcrumb = memo<FileBreadcrumbProps>(({ files, pathSegments =
                   ref={(ref) => {
                     segmentRefs.current[index] = ref;
                   }}
-                  className={classNames('flex items-center gap-1.5 cursor-pointer shrink-0', {
-                    'text-bolt-elements-textTertiary hover:text-bolt-elements-textPrimary': !isActive,
-                    'text-bolt-elements-textPrimary underline': isActive,
+                  className={classNames('flex items-center gap-1.5 cursor-pointer shrink-0 transition-colors', {
+                    'text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400': !isActive,
+                    'text-blue-600 dark:text-blue-400 underline': isActive,
                     'pr-4': isLast,
                   })}
                   onClick={() => handleSegmentClick(index)}
@@ -101,7 +101,9 @@ export const FileBreadcrumb = memo<FileBreadcrumbProps>(({ files, pathSegments =
                   {segment}
                 </span>
               </DropdownMenu.Trigger>
-              {index > 0 && !isLast && <span className="i-ph:caret-right inline-block mx-1" />}
+              {index > 0 && !isLast && (
+                <span className="i-ph:caret-right inline-block mx-1 text-gray-400 dark:text-gray-500" />
+              )}
               <AnimatePresence>
                 {isActive && (
                   <DropdownMenu.Portal>
@@ -119,8 +121,8 @@ export const FileBreadcrumb = memo<FileBreadcrumbProps>(({ files, pathSegments =
                         exit="close"
                         variants={contextMenuVariants}
                       >
-                        <div className="rounded-lg overflow-hidden">
-                          <div className="max-h-[50vh] min-w-[300px] overflow-scroll bg-bolt-elements-background-depth-1 border border-bolt-elements-borderColor shadow-sm rounded-lg">
+                        <div className="rounded-xl overflow-hidden">
+                          <div className="max-h-[50vh] min-w-[300px] overflow-scroll bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border border-gray-200/50 dark:border-slate-700/50 shadow-xl rounded-xl">
                             <FileTree
                               files={files}
                               hideRoot
@@ -135,7 +137,7 @@ export const FileBreadcrumb = memo<FileBreadcrumbProps>(({ files, pathSegments =
                             />
                           </div>
                         </div>
-                        <DropdownMenu.Arrow className="fill-bolt-elements-borderColor" />
+                        <DropdownMenu.Arrow className="fill-gray-200 dark:fill-slate-700" />
                       </motion.div>
                     </DropdownMenu.Content>
                   </DropdownMenu.Portal>

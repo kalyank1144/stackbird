@@ -1,4 +1,13 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16">
-  <rect width="16" height="16" rx="2" fill="#1389fd" />
-  <path d="M7.398 9.091h-3.58L10.364 2 8.602 6.909h3.58L5.636 14l1.762-4.909Z" fill="#fff" />
+  <defs>
+    <linearGradient id="sbGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#3b82f6"/>
+      <stop offset="100%" style="stop-color:#8b5cf6"/>
+    </linearGradient>
+  </defs>
+  <rect width="16" height="16" rx="3" fill="url(#sbGrad)" />
+  <!-- Bird silhouette -->
+  <path d="M4 9.5c0-2.5 2-4.5 4.5-4.5 1.5 0 2.8.7 3.5 1.8l.5-.3c.3-.2.5 0 .5.3v2c0 .3-.3.5-.5.3l-.5-.3c-.2 1.5-1.2 2.7-2.5 3.2l1 1.5c.2.3 0 .5-.3.5H9c-.2 0-.3-.1-.4-.2l-1.1-1.8c-.2 0-.3 0-.5 0-2.5 0-4-2-4-4.5z" fill="#fff"/>
+  <!-- Eye -->
+  <circle cx="9.5" cy="7" r="0.8" fill="url(#sbGrad)"/>
 </svg>

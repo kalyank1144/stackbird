@@ -3,8 +3,11 @@ import { ClientOnly } from 'remix-utils/client-only';
 import { classNames } from '~/utils/classNames';
 import { PROVIDER_LIST } from '~/utils/constants';
 import { ModelSelector } from '~/components/chat/ModelSelector';
-import { APIKeyManager } from './APIKeyManager';
-import { LOCAL_PROVIDERS } from '~/lib/stores/settings';
+
+/*
+ * APIKeyManager removed - API keys are managed server-side for monetization
+ * import { APIKeyManager } from './APIKeyManager';
+ */
 import FilePreview from './FilePreview';
 import { ScreenshotStateManager } from './ScreenshotStateManager';
 import { SendButton } from './SendButton.client';
@@ -67,7 +70,7 @@ export const ChatBox: React.FC<ChatBoxProps> = (props) => {
   return (
     <div
       className={classNames(
-        'relative bg-bolt-elements-background-depth-2 backdrop-blur p-3 rounded-lg border border-bolt-elements-borderColor relative w-full max-w-chat mx-auto z-prompt',
+        'relative bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl p-4 rounded-2xl border border-white/30 dark:border-slate-700/50 shadow-[0_8px_32px_rgba(0,0,0,0.08)] relative w-full max-w-chat mx-auto z-prompt',
 
         /*
          * {
@@ -87,10 +90,10 @@ export const ChatBox: React.FC<ChatBoxProps> = (props) => {
             gradientUnits="userSpaceOnUse"
             gradientTransform="rotate(-45)"
           >
-            <stop offset="0%" stopColor="#b44aff" stopOpacity="0%"></stop>
-            <stop offset="40%" stopColor="#b44aff" stopOpacity="80%"></stop>
-            <stop offset="50%" stopColor="#b44aff" stopOpacity="80%"></stop>
-            <stop offset="100%" stopColor="#b44aff" stopOpacity="0%"></stop>
+            <stop offset="0%" stopColor="#3B82F6" stopOpacity="0%"></stop>
+            <stop offset="40%" stopColor="#3B82F6" stopOpacity="80%"></stop>
+            <stop offset="50%" stopColor="#A855F7" stopOpacity="80%"></stop>
+            <stop offset="100%" stopColor="#A855F7" stopOpacity="0%"></stop>
           </linearGradient>
           <linearGradient id="shine-gradient">
             <stop offset="0%" stopColor="white" stopOpacity="0%"></stop>
@@ -117,17 +120,7 @@ export const ChatBox: React.FC<ChatBoxProps> = (props) => {
                 apiKeys={props.apiKeys}
                 modelLoading={props.isModelLoading}
               />
-              {(props.providerList || []).length > 0 &&
-                props.provider &&
-                !LOCAL_PROVIDERS.includes(props.provider.name) && (
-                  <APIKeyManager
-                    provider={props.provider}
-                    apiKey={props.apiKeys[props.provider.name] || ''}
-                    setApiKey={(key) => {
-                      props.onApiKeysChange(props.provider.name, key);
-                    }}
-                  />
-                )}
+              {/* APIKeyManager removed - API keys are managed server-side for monetization */}
             </div>
           )}
         </ClientOnly>
@@ -151,15 +144,15 @@ export const ChatBox: React.FC<ChatBoxProps> = (props) => {
         )}
       </ClientOnly>
       {props.selectedElement && (
-        <div className="flex mx-1.5 gap-2 items-center justify-between rounded-lg rounded-b-none border border-b-none border-bolt-elements-borderColor text-bolt-elements-textPrimary flex py-1 px-2.5 font-medium text-xs">
+        <div className="flex mx-1.5 gap-2 items-center justify-between rounded-xl rounded-b-none border border-b-none border-blue-200/50 dark:border-blue-800/50 bg-blue-50/50 dark:bg-blue-900/20 text-gray-700 dark:text-gray-300 flex py-1.5 px-3 font-medium text-xs">
           <div className="flex gap-2 items-center lowercase">
-            <code className="bg-accent-500 rounded-4px px-1.5 py-1 mr-0.5 text-white">
+            <code className="bg-gradient-to-r from-blue-500 to-purple-500 rounded-lg px-2 py-1 mr-0.5 text-white">
               {props?.selectedElement?.tagName}
             </code>
             selected for inspection
           </div>
           <button
-            className="bg-transparent text-accent-500 pointer-auto"
+            className="bg-transparent text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors"
             onClick={() => props.setSelectedElement?.(null)}
           >
             Clear
@@ -167,14 +160,16 @@ export const ChatBox: React.FC<ChatBoxProps> = (props) => {
         </div>
       )}
       <div
-        className={classNames('relative shadow-xs border border-bolt-elements-borderColor backdrop-blur rounded-lg')}
+        className={classNames(
+          'relative shadow-sm border border-gray-200/50 dark:border-slate-700/50 backdrop-blur-sm rounded-xl bg-gray-50/50 dark:bg-slate-800/30',
+        )}
       >
         <textarea
           ref={props.textareaRef}
           className={classNames(
-            'w-full pl-4 pt-4 pr-16 outline-none resize-none text-bolt-elements-textPrimary placeholder-bolt-elements-textTertiary bg-transparent text-sm',
+            'w-full pl-4 pt-4 pr-16 outline-none resize-none text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 bg-transparent text-sm',
             'transition-all duration-200',
-            'hover:border-bolt-elements-focus',
+            'focus:ring-2 focus:ring-blue-500/20',
           )}
           onDragEnter={(e) => {
             e.preventDefault();
@@ -275,9 +270,9 @@ export const ChatBox: React.FC<ChatBoxProps> = (props) => {
               }}
             >
               {props.enhancingPrompt ? (
-                <div className="i-svg-spinners:90-ring-with-bg text-bolt-elements-loader-progress text-xl animate-spin"></div>
+                <div className="i-svg-spinners:90-ring-with-bg text-sb-loader-progress text-xl animate-spin"></div>
               ) : (
-                <div className="i-bolt:stars text-xl"></div>
+                <div className="i-sb:stars text-xl"></div>
               )}
             </IconButton>
 
@@ -293,8 +288,8 @@ export const ChatBox: React.FC<ChatBoxProps> = (props) => {
                 className={classNames(
                   'transition-all flex items-center gap-1 px-1.5',
                   props.chatMode === 'discuss'
-                    ? '!bg-bolt-elements-item-backgroundAccent !text-bolt-elements-item-contentAccent'
-                    : 'bg-bolt-elements-item-backgroundDefault text-bolt-elements-item-contentDefault',
+                    ? '!bg-blue-50 dark:!bg-blue-900/30 !text-blue-600 dark:!text-blue-400'
+                    : 'bg-transparent text-gray-500 dark:text-gray-400',
                 )}
                 onClick={() => {
                   props.setChatMode?.(props.chatMode === 'discuss' ? 'build' : 'discuss');
@@ -307,10 +302,8 @@ export const ChatBox: React.FC<ChatBoxProps> = (props) => {
             <IconButton
               title="Model Settings"
               className={classNames('transition-all flex items-center gap-1', {
-                'bg-bolt-elements-item-backgroundAccent text-bolt-elements-item-contentAccent':
-                  props.isModelSettingsCollapsed,
-                'bg-bolt-elements-item-backgroundDefault text-bolt-elements-item-contentDefault':
-                  !props.isModelSettingsCollapsed,
+                'bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400': props.isModelSettingsCollapsed,
+                'bg-transparent text-gray-500 dark:text-gray-400': !props.isModelSettingsCollapsed,
               })}
               onClick={() => props.setIsModelSettingsCollapsed(!props.isModelSettingsCollapsed)}
               disabled={!props.providerList || props.providerList.length === 0}
@@ -320,9 +313,16 @@ export const ChatBox: React.FC<ChatBoxProps> = (props) => {
             </IconButton>
           </div>
           {props.input.length > 3 ? (
-            <div className="text-xs text-bolt-elements-textTertiary">
-              Use <kbd className="kdb px-1.5 py-0.5 rounded bg-bolt-elements-background-depth-2">Shift</kbd> +{' '}
-              <kbd className="kdb px-1.5 py-0.5 rounded bg-bolt-elements-background-depth-2">Return</kbd> a new line
+            <div className="text-xs text-gray-400 dark:text-gray-500">
+              Use{' '}
+              <kbd className="kdb px-1.5 py-0.5 rounded-lg bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-gray-400">
+                Shift
+              </kbd>{' '}
+              +{' '}
+              <kbd className="kdb px-1.5 py-0.5 rounded-lg bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-gray-400">
+                Return
+              </kbd>{' '}
+              a new line
             </div>
           ) : null}
           <SupabaseConnection />

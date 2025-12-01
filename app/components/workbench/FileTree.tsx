@@ -216,7 +216,7 @@ function ContextMenuItem({ onSelect, children }: { onSelect?: () => void; childr
   return (
     <ContextMenu.Item
       onSelect={onSelect}
-      className="flex items-center gap-2 px-2 py-1.5 outline-0 text-sm text-bolt-elements-textPrimary cursor-pointer ws-nowrap text-bolt-elements-item-contentDefault hover:text-bolt-elements-item-contentActive hover:bg-bolt-elements-item-backgroundActive rounded-md"
+      className="flex items-center gap-2 px-3 py-2 outline-0 text-sm text-gray-700 dark:text-gray-300 cursor-pointer ws-nowrap hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-xl transition-colors"
     >
       <span className="size-4 shrink-0"></span>
       <span>{children}</span>
@@ -256,14 +256,14 @@ function InlineInput({ depth, placeholder, initialValue = '', onSubmit, onCancel
 
   return (
     <div
-      className="flex items-center w-full px-2 bg-bolt-elements-background-depth-4 border border-bolt-elements-item-contentAccent py-0.5 text-bolt-elements-textPrimary"
+      className="flex items-center w-full px-2 bg-blue-50 dark:bg-blue-900/30 border border-blue-300 dark:border-blue-700 py-0.5 text-gray-700 dark:text-gray-300 rounded-lg"
       style={{ paddingLeft: `${6 + depth * NODE_PADDING_LEFT}px` }}
     >
-      <div className="scale-120 shrink-0 i-ph:file-plus text-bolt-elements-textTertiary" />
+      <div className="scale-120 shrink-0 i-ph:file-plus text-blue-500 dark:text-blue-400" />
       <input
         ref={inputRef}
         type="text"
-        className="ml-2 flex-1 bg-transparent border-none outline-none py-0.5 text-sm text-bolt-elements-textPrimary placeholder:text-bolt-elements-textTertiary min-w-0"
+        className="ml-2 flex-1 bg-transparent border-none outline-none py-0.5 text-sm text-gray-700 dark:text-gray-300 placeholder:text-gray-400 dark:placeholder:text-gray-500 min-w-0"
         placeholder={placeholder}
         onKeyDown={handleKeyDown}
         onBlur={() => {
@@ -491,7 +491,7 @@ function FileContextMenu({
             onDragLeave={handleDragLeave}
             onDrop={handleDrop}
             className={classNames('relative', {
-              'bg-bolt-elements-background-depth-2 border border-dashed border-bolt-elements-item-contentAccent rounded-md':
+              'bg-blue-50 dark:bg-blue-900/30 border border-dashed border-blue-300 dark:border-blue-700 rounded-lg':
                 isDragging,
             })}
           >
@@ -501,9 +501,9 @@ function FileContextMenu({
         <ContextMenu.Portal>
           <ContextMenu.Content
             style={{ zIndex: 998 }}
-            className="border border-bolt-elements-borderColor rounded-md z-context-menu bg-bolt-elements-background-depth-1 dark:bg-bolt-elements-background-depth-2 data-[state=open]:animate-in animate-duration-100 data-[state=open]:fade-in-0 data-[state=open]:zoom-in-98 w-56"
+            className="border border-gray-200/50 dark:border-slate-700/50 rounded-xl z-context-menu bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl shadow-lg data-[state=open]:animate-in animate-duration-100 data-[state=open]:fade-in-0 data-[state=open]:zoom-in-98 w-56 p-1"
           >
-            <ContextMenu.Group className="p-1 border-b-px border-solid border-bolt-elements-borderColor">
+            <ContextMenu.Group className="p-1 border-b border-gray-200/50 dark:border-slate-700/50">
               <ContextMenuItem onSelect={() => setIsCreatingFile(true)}>
                 <div className="flex items-center gap-2">
                   <div className="i-ph:file-plus" />
@@ -522,7 +522,7 @@ function FileContextMenu({
               <ContextMenuItem onSelect={onCopyRelativePath}>Copy relative path</ContextMenuItem>
             </ContextMenu.Group>
             {/* Add lock/unlock options for files and folders */}
-            <ContextMenu.Group className="p-1 border-t-px border-solid border-bolt-elements-borderColor">
+            <ContextMenu.Group className="p-1 border-t border-gray-200/50 dark:border-slate-700/50">
               {!isFolder ? (
                 <>
                   <ContextMenuItem onSelect={handleLockFile}>
@@ -556,7 +556,7 @@ function FileContextMenu({
               )}
             </ContextMenu.Group>
             {/* Add delete option in a new group */}
-            <ContextMenu.Group className="p-1 border-t-px border-solid border-bolt-elements-borderColor">
+            <ContextMenu.Group className="p-1 border-t border-gray-200/50 dark:border-slate-700/50">
               <ContextMenuItem onSelect={handleDelete}>
                 <div className="flex items-center gap-2 text-red-500">
                   <div className="i-ph:trash" />
@@ -595,9 +595,10 @@ function Folder({ folder, collapsed, selected = false, onCopyPath, onCopyRelativ
     <FileContextMenu onCopyPath={onCopyPath} onCopyRelativePath={onCopyRelativePath} fullPath={folder.fullPath}>
       <NodeButton
         className={classNames('group', {
-          'bg-transparent text-bolt-elements-item-contentDefault hover:text-bolt-elements-item-contentActive hover:bg-bolt-elements-item-backgroundActive':
+          'bg-transparent text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30':
             !selected,
-          'bg-bolt-elements-item-backgroundAccent text-bolt-elements-item-contentAccent': selected,
+          'bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/30 dark:to-purple-900/30 text-blue-600 dark:text-blue-400':
+            selected,
         })}
         depth={folder.depth}
         iconClasses={classNames({
@@ -687,19 +688,19 @@ function File({
     <FileContextMenu onCopyPath={onCopyPath} onCopyRelativePath={onCopyRelativePath} fullPath={fullPath}>
       <NodeButton
         className={classNames('group', {
-          'bg-transparent hover:bg-bolt-elements-item-backgroundActive text-bolt-elements-item-contentDefault':
-            !selected,
-          'bg-bolt-elements-item-backgroundAccent text-bolt-elements-item-contentAccent': selected,
+          'bg-transparent hover:bg-blue-50 dark:hover:bg-blue-900/30 text-gray-600 dark:text-gray-400': !selected,
+          'bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/30 dark:to-purple-900/30 text-blue-600 dark:text-blue-400':
+            selected,
         })}
         depth={depth}
         iconClasses={classNames('i-ph:file-duotone scale-98', {
-          'group-hover:text-bolt-elements-item-contentActive': !selected,
+          'group-hover:text-blue-500': !selected,
         })}
         onClick={onClick}
       >
         <div
           className={classNames('flex items-center', {
-            'group-hover:text-bolt-elements-item-contentActive': !selected,
+            'group-hover:text-blue-600 dark:group-hover:text-blue-400': !selected,
           })}
         >
           <div className="flex-1 truncate pr-2">{name}</div>
@@ -736,7 +737,7 @@ function NodeButton({ depth, iconClasses, onClick, className, children }: Button
   return (
     <button
       className={classNames(
-        'flex items-center gap-1.5 w-full pr-2 border-2 border-transparent text-faded py-0.5',
+        'flex items-center gap-1.5 w-full pr-2 border-2 border-transparent text-faded py-1 rounded-lg transition-all duration-150',
         className,
       )}
       style={{ paddingLeft: `${6 + depth * NODE_PADDING_LEFT}px` }}
